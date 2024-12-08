@@ -1,6 +1,6 @@
 # Bevy Pathfinder
 
-`Path`finding looked like a fun project. Figured I'd use it to learn Bevy.
+Pathfinding looked like a fun project. Figured I'd use it to learn Bevy.
 
 ## How to run
 `cargo run`

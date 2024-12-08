@@ -72,7 +72,6 @@ fn animate_tile(
             if *vis == Visibility::Hidden {
                 vis.toggle_visible_hidden();
             }
-            println!("Animating, Scale: {}", xf.scale);
             if !animate_state.shrinking {
                 animate_state.growing = true;
             }
@@ -116,10 +115,6 @@ fn set_current_tile(
             && player_position.y > tile_position.y - (TILE_SIZE / 2.);
 
         if is_in_x && is_in_y {
-            println!(
-                "Current tile, row: {} col: {}",
-                tile_props.row, tile_props.col
-            );
             tile_props.current = true;
             tile_anim.initiated = true;
         } else {
@@ -147,26 +142,6 @@ fn create_tile_grid(
             } else {
                 TEMP_TILE_COLOR_2
             };
-            if r == 0 && c == 0 {
-                commands.spawn((
-                    Tile {
-                        row: r,
-                        col: c,
-                        current: false,
-                        scale: 1.0,
-                    },
-                    AnimateTile {
-                        growing: true,
-                        shrinking: false,
-                        initiated: true,
-                        ran: false,
-                    },
-                    Mesh2d(meshes.add(Rectangle::new(TILE_SIZE, TILE_SIZE))),
-                    MeshMaterial2d(materials.add(tile_color)),
-                    Transform::from_xyz(x_position, y_position, 0.5),
-                    Visibility::Visible,
-                ));
-            }
 
             commands.spawn((
                 Tile {
@@ -207,7 +182,7 @@ fn setup(
     commands.spawn((
         Player,
         MyMovementState {
-            position: Vec3::new(0., 0., 5.),
+            position: Vec3::new(3., 4., 5.),
             rotation: Quat::from_rotation_z((180.0_f32).to_radians()),
             velocity: Vec3::new(300., 300., 0.),
         },

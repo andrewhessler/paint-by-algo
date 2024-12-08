@@ -1,4 +1,4 @@
-# Bevy `Path`finder
+# Bevy Pathfinder
 
 `Path`finding looked like a fun project. Figured I'd use it to learn Bevy.
 

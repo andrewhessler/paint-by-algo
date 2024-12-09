@@ -1,3 +1,4 @@
+use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 
 const PLAYER_COLOR: Color = Color::hsl(0., 1.0, 0.5);
@@ -5,6 +6,7 @@ const GROUND_COLOR: Color = Color::srgb(0.0, 0.0, 0.0);
 
 const TEMP_TILE_COLOR_1: Color = Color::hsl(316., 0.31, 0.58);
 const TEMP_TILE_COLOR_2: Color = Color::hsl(225., 0.31, 0.38);
+const END_TILE_COLOR: Color = Color::hsl(360., 0.80, 0.50);
 
 const FLOOR_W: f32 = 1200.;
 const FLOOR_H: f32 = 600.;
@@ -20,16 +22,17 @@ const COL_COUNT: i32 = (FLOOR_W / TILE_SIZE) as i32;
 #[derive(Component)]
 struct Ground;
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 struct Tile {
     row: i32,
     col: i32,
     current: bool,
-    scale: f32,
+    is_end: bool,
 }
 
 #[derive(Component)]
 struct AnimateTile {
+    enabled: bool,
     growing: bool,
     shrinking: bool,
     initiated: bool,
@@ -54,10 +57,17 @@ struct OldMovementState {
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        // .add_plugins(FrameTimeDiagnosticsPlugin::default())
+        // .add_plugins(LogDiagnosticsPlugin::default())
         .add_systems(Startup, setup)
         .add_systems(
             FixedUpdate,
-            (player_movement, animate_tile, set_current_tile),
+            (
+                player_movement,
+                animate_tile,
+                set_current_tile,
+                draw_path_to_end,
+            ),
         )
         .add_systems(Update, transform_movement_interpolate)
         .run();
@@ -67,8 +77,8 @@ fn animate_tile(
     time: Res<Time>,
     mut tiles: Query<(&mut Transform, &mut Tile, &mut AnimateTile, &mut Visibility)>,
 ) {
-    for (mut xf, mut tile, mut animate_state, mut vis) in &mut tiles {
-        if animate_state.initiated && !animate_state.ran {
+    for (mut xf, _tile, mut animate_state, mut vis) in &mut tiles {
+        if animate_state.initiated && !animate_state.ran && animate_state.enabled {
             if *vis == Visibility::Hidden {
                 vis.toggle_visible_hidden();
             }
@@ -137,20 +147,31 @@ fn create_tile_grid(
         for c in 0..COL_COUNT {
             let x_position = L_BORDER + ((TILE_SIZE * c as f32) + TILE_OFFSET);
             let y_position = T_BORDER - ((TILE_SIZE * r as f32) + TILE_OFFSET);
-            let tile_color = if (r + c) % 2 == 0 {
+            let mut tile_color = if (r + c) % 2 == 0 {
                 TEMP_TILE_COLOR_1
             } else {
                 TEMP_TILE_COLOR_2
             };
+
+            let mut visibility = Visibility::Hidden;
+            let mut is_end = false;
+            let mut anim_enabled = true;
+            if r == ROW_COUNT - 1 && c == COL_COUNT - 1 {
+                visibility = Visibility::Visible;
+                is_end = true;
+                anim_enabled = false;
+                tile_color = END_TILE_COLOR;
+            }
 
             commands.spawn((
                 Tile {
                     row: r,
                     col: c,
                     current: false,
-                    scale: 1.0,
+                    is_end,
                 },
                 AnimateTile {
+                    enabled: anim_enabled,
                     growing: false,
                     shrinking: false,
                     initiated: false,
@@ -159,7 +180,7 @@ fn create_tile_grid(
                 Mesh2d(meshes.add(Rectangle::new(TILE_SIZE, TILE_SIZE))),
                 MeshMaterial2d(materials.add(tile_color)),
                 Transform::from_xyz(x_position, y_position, 0.5),
-                Visibility::Hidden,
+                visibility,
             ));
         }
     }
@@ -245,5 +266,15 @@ fn transform_movement_interpolate(
         let a = fixed_time.overstep_fraction();
         xf.translation = old_state.position.lerp(state.position, a);
         xf.rotation = state.rotation;
+    }
+}
+
+fn draw_path_to_end(time: Res<Time>, mut tiles: Query<(&mut Tile)>, mut count: Local<u32>) {
+    *count += 1;
+    if *count == 1 {
+        let tiles: Vec<&Tile> = tiles.iter().collect();
+        for tile in tiles {
+            println!("{:?}", tile);
+        }
     }
 }

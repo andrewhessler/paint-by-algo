@@ -21,18 +21,6 @@ struct AnimateTile {
     ran: bool,
 }
 
-#[derive(Component)]
-struct MyMovementState {
-    position: Vec3,
-    rotation: Quat,
-    velocity: Vec3,
-}
-
-#[derive(Component)]
-struct OldMovementState {
-    position: Vec3,
-}
-
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
@@ -41,7 +29,6 @@ fn main() {
         // .add_systems(
         //     FixedUpdate,
         //     (
-        //         player_movement,
         //         animate_tile,
         //         set_current_tile,
         //         draw_path_to_end,

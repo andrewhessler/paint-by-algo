@@ -1,11 +1,13 @@
-use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
-use level_instantiation::camera::SceneCameraPlugin;
-use level_instantiation::ground::GroundPlugin;
-use level_instantiation::player::PlayerPlugin;
-use level_instantiation::tile::TilePlugin;
+use entities::camera::SceneCameraPlugin;
+use entities::ground::GroundPlugin;
+use entities::player::PlayerPlugin;
+use entities::tile::TilePlugin;
+use systems::player_movement::PlayerMovementPlugin;
 
-mod level_instantiation;
+mod debug;
+mod entities;
+mod systems;
 
 const TILE_ANIMATION_MAX_SCALE: f32 = 1.3;
 const TILE_ANIMATION_STEP: f32 = 3.0;
@@ -18,9 +20,6 @@ struct AnimateTile {
     initiated: bool,
     ran: bool,
 }
-
-#[derive(Component)]
-struct Player;
 
 #[derive(Component)]
 struct MyMovementState {
@@ -38,8 +37,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins((PlayerPlugin, GroundPlugin, TilePlugin, SceneCameraPlugin))
-        // .add_plugins(FrameTimeDiagnosticsPlugin::default())
-        // .add_plugins(LogDiagnosticsPlugin::default())
+        .add_plugins(PlayerMovementPlugin)
         // .add_systems(
         //     FixedUpdate,
         //     (
@@ -117,65 +115,6 @@ fn main() {
 //     }
 // }
 //
-// fn setup(
-//     mut commands: Commands,
-//     mut meshes: ResMut<Assets<Mesh>>,
-//     mut materials: ResMut<Assets<ColorMaterial>>,
-// ) {
-//     // create_tile_grid(&mut commands, &mut meshes, &mut materials);
-//     commands.spawn(Camera2d);
-// }
-//
-// fn player_movement(
-//     time: Res<Time>,
-//     keys: Res<ButtonInput<KeyCode>>,
-//     mut movement: Query<(&mut MyMovementState, &mut OldMovementState)>,
-// ) {
-//     for (mut state, mut old_state) in &mut movement {
-//         let state = &mut *state;
-//         old_state.position = state.position;
-//         let mut y_dir = 0.0_f32;
-//         let mut x_dir = 0.0_f32;
-//
-//         if keys.pressed(KeyCode::KeyW) {
-//             state.position.y += state.velocity.y * time.delta_secs();
-//             y_dir = -1.0;
-//         }
-//
-//         if keys.pressed(KeyCode::KeyS) {
-//             state.position.y -= state.velocity.y * time.delta_secs();
-//             y_dir = 1.0;
-//         }
-//
-//         if keys.pressed(KeyCode::KeyA) {
-//             state.position.x -= state.velocity.x * time.delta_secs();
-//             x_dir = -1.0;
-//         }
-//
-//         if keys.pressed(KeyCode::KeyD) {
-//             state.position.x += state.velocity.x * time.delta_secs();
-//             x_dir = 1.0;
-//         }
-//
-//         let angle = x_dir.atan2(y_dir);
-//         state.rotation = if y_dir != 0.0 || x_dir != 0.0 {
-//             Quat::from_rotation_z(angle)
-//         } else {
-//             state.rotation
-//         };
-//     }
-// }
-//
-// fn transform_movement_interpolate(
-//     fixed_time: Res<Time<Fixed>>,
-//     mut movement: Query<(&mut Transform, &mut MyMovementState, &mut OldMovementState)>,
-// ) {
-//     for (mut xf, state, old_state) in &mut movement {
-//         let a = fixed_time.overstep_fraction();
-//         xf.translation = old_state.position.lerp(state.position, a);
-//         xf.rotation = state.rotation;
-//     }
-// }
 //
 // fn draw_path_to_end(time: Res<Time>, mut tiles: Query<(&mut Tile)>, mut count: Local<u32>) {
 //     *count += 1;

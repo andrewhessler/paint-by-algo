@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::level_instantiation::ground::{GROUND_L_BORDER, GROUND_T_BORDER};
+use crate::entities::ground::{GROUND_L_BORDER, GROUND_T_BORDER};
 
 use super::ground::{GROUND_H, GROUND_W};
 
@@ -19,6 +19,17 @@ struct Tile {
     col: i32,
     current: bool,
     is_end: bool,
+}
+
+impl Default for Tile {
+    fn default() -> Self {
+        Tile {
+            row: 0, // TODO: turn this into an option after system breakout, maybe
+            col: 0, // TODO: turn this into an option after system breakout, maybe
+            current: false,
+            is_end: false,
+        }
+    }
 }
 
 pub struct TilePlugin;
@@ -59,8 +70,8 @@ fn spawn_tile_grid(
                 Tile {
                     row: r,
                     col: c,
-                    current: false,
                     is_end,
+                    ..Default::default()
                 },
                 // AnimateTile {
                 //     enabled: anim_enabled,

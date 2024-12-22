@@ -3,7 +3,7 @@ use entities::camera::SceneCameraPlugin;
 use entities::ground::GroundPlugin;
 use entities::player::PlayerPlugin;
 use entities::tile::TilePlugin;
-use systems::emit_current_tile_as_activated::SetCurrentTilePlugin;
+use systems::emit_current_tile::EmitCurrentTilePlugin;
 use systems::player_movement::PlayerMovementPlugin;
 use systems::tile_animation::TileAnimationPlugin;
 
@@ -22,7 +22,7 @@ fn main() {
         .add_plugins((
             PlayerMovementPlugin,
             TileAnimationPlugin,
-            SetCurrentTilePlugin,
+            EmitCurrentTilePlugin,
         ))
         .run();
 }

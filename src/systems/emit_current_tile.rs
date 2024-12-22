@@ -2,21 +2,28 @@ use bevy::prelude::*;
 
 use crate::entities::{
     player::Player,
-    tile::{Tile, TileActivated, TILE_SIZE},
+    tile::{Tile, TILE_SIZE},
 };
 
-pub struct SetCurrentTilePlugin;
+#[derive(Event)]
+pub(crate) struct CurrentTileEvent {
+    pub id: usize,
+}
 
-impl Plugin for SetCurrentTilePlugin {
+pub struct EmitCurrentTilePlugin;
+
+impl Plugin for EmitCurrentTilePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, emit_current_tile_as_activated);
+        app.add_event::<CurrentTileEvent>()
+            .add_systems(FixedUpdate, emit_current_tile);
     }
 }
 
-fn emit_current_tile_as_activated(
+fn emit_current_tile(
     player: Query<(&Transform, &Player)>,
     tiles: Query<(&Transform, &Tile)>,
-    mut tile_activated_writer: EventWriter<TileActivated>,
+    mut current_tile_writer: EventWriter<CurrentTileEvent>,
+    mut prev_current_id: Local<Option<usize>>,
 ) {
     let player_position = player.single().0.translation;
     for (&xf, tile) in &tiles {
@@ -28,7 +35,11 @@ fn emit_current_tile_as_activated(
             && player_position.y > tile_position.y - (TILE_SIZE / 2.);
 
         if is_in_x && is_in_y {
-            tile_activated_writer.send(TileActivated { id: tile.id });
+            if prev_current_id.map_or(true, |id| id != tile.id) {
+                println!("NEW CURRENT TILE {}", tile.id);
+                *prev_current_id = Some(tile.id);
+                current_tile_writer.send(CurrentTileEvent { id: tile.id });
+            }
         }
     }
 }

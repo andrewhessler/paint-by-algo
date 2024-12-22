@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 
-use crate::entities::tile::{Tile, TileActivated};
+use crate::entities::tile::Tile;
+
+use super::emit_current_tile::CurrentTileEvent;
 
 const TILE_ANIMATION_MAX_SCALE: f32 = 1.3;
 const TILE_ANIMATION_STEP: f32 = 3.0;
@@ -65,7 +67,7 @@ fn animate_tile(
 
 fn initiate_animation_by_activated_tile(
     mut anim_states: Query<(&Tile, &mut TileAnimation)>,
-    mut tile_activated_reader: EventReader<TileActivated>,
+    mut tile_activated_reader: EventReader<CurrentTileEvent>,
 ) {
     for event in tile_activated_reader.read() {
         for (tile, mut anim_state) in &mut anim_states {

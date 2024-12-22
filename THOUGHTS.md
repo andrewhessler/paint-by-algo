@@ -94,3 +94,36 @@ If they performed completely different animations that wouldn't be a big deal I 
 
 
 ### Time for Pathfinding
+Should I:
+1. Produce a path calculation from a path calculating system to be consumed by `TileAnimation` and maybe other Services.
+1. Have a System that both caculates the path and is then in charge of activating tiles with `TileActivated` events.
+
+I'm not liking the `TileActivated` Writer setup. I think I want `emit_current_tile_as_activated` to just emit `CurrentTile` events.
+
+`Tile` can consume `CurrentTile` and emit `TileActivated`, which `TileAnimation` consumes. 
+For pathfinding we'll probably emit `TileVisited` and `TileChecked`, and `TileAnimation` will consume those as well.
+This is going to get crazy, I feel like I'm going to need some sort of debouncing.
+
+I don't feel this is getting too convoluted, though `TileAnimation` could just consume `CurrentTile`... let's do that for now, 
+though I'm not saying there's anything wrong with funneling into `TileActivated` if it had significant meaning in context.
+
+For now, I think I want things to react specifically to `CurrentTile`, and the calculation service probably will, too. 
+Every plugin is becoming its own little bundle of microservices.
+
+Also going back to single-writer again I think, so maybe it was right all along, 
+though still think a single plugin writing in multiple places counts as a single writer, like microservices, also still the inverse for notification systems? 
+Unless you do tailored notifications, and that announces things it observes about topics? 
+Seems like too much logic, could have some sort of observer service for unique scenarios, but probably always an easy async way to send notifications with multi-writer to the queue.
+
+It's weird that animating the current tile depends on `EmitCurrentTilePlugin` being included... 
+but just because it's decoupled doesn't mean it isn't dependent for functionality. Think replication. I think it's nice, maybe.
+
+Should all the emitters go into their own emitter folder in systems? Maybe some day.
+
+For now `emit_pathfinding` will handle actually calculating the path and controlling the rate of emitting the events `TileChecked` and `TileVisited`.
+
+Should something like `CurrentTile` be on a timer or at least deduping? 
+We'll see if it causes issues. For now we have some local deduping in like `TileAnimation`, but should probably store previous_current locally and dedupe.
+
+Okay, deduping `CurrentTileEvent`s, I swear I'll actually do the pathfinding now. 
+I'm going to let each algorithm read a collection of `Tile`s directly and spit out visit/checked with id.

@@ -139,3 +139,19 @@ Everything in pathfinding event emitting feels wrong. I don't think I'll have a 
 I'll make this silly way work for now if I can.
 
 Going to naively wait to consume pathfinding events in `AnimateTile`. Probably have some issues with making the ripple smooth.
+
+
+PATHFINDING PRETTY MUCH ANIMATING!
+
+### Quick Check-in
+Think there's something wrong with my algorithm implementation. But could be wrong. 
+I really want to do what I can to clean up the animation, I want a new queue of ripples to fire off on every new current tile. 
+Can I just assume the entire event read is an entire calculation? I could maybe make it that way, but I'll assume for now to see what happens.
+
+Could think about pathfinding emitting a `CalculationOrderEvent` or something that contains all events instead of separating out the individual pathfinding events...
+
+Really quick, long term want to add placing walls, water, moving the end, adding wind that moves the player. More algorithms. Probably UI and configuration.
+
+### Algorithm and Animation Clean Up
+Put my Deques in a Vec and now I got ripples. There's probably a way better way to do this stuff. Gonna play with a second animation and look at the algorithm accuracy.
+Also may check how other people are doing their animations.

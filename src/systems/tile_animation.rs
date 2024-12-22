@@ -97,7 +97,7 @@ fn initiate_animation_by_current_tile(
 #[derive(Resource)]
 struct PathfindingAnimationGate {
     pub timer: Timer,
-    pub event_queue: VecDeque<PathfindingEvent>,
+    pub event_queues: Vec<VecDeque<PathfindingEvent>>,
 }
 
 fn setup_pathfinding_animation_timer(mut commands: Commands) {
@@ -106,7 +106,7 @@ fn setup_pathfinding_animation_timer(mut commands: Commands) {
             Duration::from_millis(PATHFINDING_ANIMATION_DELAY_MS),
             TimerMode::Repeating,
         ),
-        event_queue: VecDeque::new(),
+        event_queues: Vec::new(),
     });
 }
 
@@ -116,23 +116,28 @@ fn initiate_animation_by_pathfound_tile(
     time: Res<Time>,
     mut animation_gate: ResMut<PathfindingAnimationGate>,
 ) {
+    let mut new_animation = VecDeque::default();
     for event in tile_activated_reader.read() {
-        animation_gate.event_queue.push_back(event.clone());
+        new_animation.push_back(event.clone());
     }
+
+    animation_gate.event_queues.push(new_animation);
     animation_gate.timer.tick(time.delta());
 
     if animation_gate.timer.finished() {
-        for _ in 0..PATHFINDING_TILE_BATCH {
-            if let Some(event) = animation_gate.event_queue.pop_front() {
-                for (tile, mut anim_state) in &mut anim_states {
-                    if tile.id == event.tile_id {
-                        if anim_state.ran == false {
-                            anim_state.initiated = true;
-                        }
-                    } else {
-                        if anim_state.ran == true {
-                            anim_state.ran = false;
-                            anim_state.initiated = false;
+        for event_queue in &mut animation_gate.event_queues {
+            for _ in 0..PATHFINDING_TILE_BATCH {
+                if let Some(event) = event_queue.pop_front() {
+                    for (tile, mut anim_state) in &mut anim_states {
+                        if tile.id == event.tile_id {
+                            if anim_state.ran == false {
+                                anim_state.initiated = true;
+                            }
+                        } else {
+                            if anim_state.ran == true {
+                                anim_state.ran = false;
+                                anim_state.initiated = false;
+                            }
                         }
                     }
                 }

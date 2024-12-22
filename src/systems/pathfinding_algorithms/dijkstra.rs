@@ -1,6 +1,9 @@
 use std::{cmp::Ordering, collections::BinaryHeap};
 
-use crate::entities::tile::{Tile, COL_COUNT, ROW_COUNT};
+use crate::{
+    entities::tile::{Tile, COL_COUNT, ROW_COUNT},
+    systems::emit_pathfinding::{PathfindingEvent, PathfindingEventType},
+};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 struct Node {
@@ -44,17 +47,7 @@ impl Node {
     }
 }
 
-pub struct DijkstraOutput {
-    pub tile_id: usize,
-    pub event_type: DijkstraEventType,
-}
-
-pub enum DijkstraEventType {
-    Visited,
-    Checked,
-}
-
-pub fn setup_and_run_dijkstra(grid: &[&Tile], current_tile_id: usize) -> Vec<DijkstraOutput> {
+pub fn setup_and_run_dijkstra(grid: &[&Tile], current_tile_id: usize) -> Vec<PathfindingEvent> {
     let mut end_tile_pos: Option<(usize, usize)> = None;
     let mut current_tile_pos: (usize, usize) = (0, 0);
 
@@ -82,7 +75,7 @@ fn dijkstra(
     mut nodes: Vec<Vec<Node>>,
     current_tile_pos: (usize, usize),
     end_tile_pos: Option<(usize, usize)>,
-) -> Vec<DijkstraOutput> {
+) -> Vec<PathfindingEvent> {
     let mut heap = BinaryHeap::new();
     let mut event_order = vec![];
     heap.push(Node {
@@ -114,9 +107,9 @@ fn dijkstra(
         }
 
         node.visited = true;
-        event_order.push(DijkstraOutput {
+        event_order.push(PathfindingEvent {
             tile_id: node.tile_id,
-            event_type: DijkstraEventType::Visited,
+            event_type: PathfindingEventType::Visited,
         });
 
         for (row_offset, col_offset) in directions {
@@ -130,9 +123,9 @@ fn dijkstra(
             let checked_node = &mut nodes[visit_row][visit_col];
             println!("{}", node.distance);
             let new_distance = node.distance + 1;
-            event_order.push(DijkstraOutput {
+            event_order.push(PathfindingEvent {
                 tile_id: checked_node.tile_id,
-                event_type: DijkstraEventType::Checked,
+                event_type: PathfindingEventType::Checked,
             });
 
             if new_distance < checked_node.distance {

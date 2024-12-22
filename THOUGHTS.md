@@ -127,3 +127,5 @@ We'll see if it causes issues. For now we have some local deduping in like `Tile
 
 Okay, deduping `CurrentTileEvent`s done, I swear I'll actually do the pathfinding now. 
 I'm going to let each algorithm read a collection of `Tile`s directly and spit out visit/checked with id.
+
+After I'm done doing this all with one animation, need to clean up animation so it's easier for one animation to lock the tile until the animation is complete.

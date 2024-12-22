@@ -12,8 +12,8 @@ use crate::{
 
 use super::ground::{GROUND_H, GROUND_W};
 
-pub const TEMP_TILE_COLOR_1: Color = Color::hsl(316., 0.31, 0.58);
-pub const TEMP_TILE_COLOR_2: Color = Color::hsl(225., 0.31, 0.38);
+pub const TEMP_TILE_COLOR_1: Color = Color::hsl(117., 0.67, 0.58);
+pub const TEMP_TILE_COLOR_2: Color = Color::hsla(171., 0.35, 0.68, 0.50);
 const END_TILE_COLOR: Color = Color::hsl(360., 0.80, 0.50);
 
 pub const TILE_SIZE: f32 = 50.;

@@ -10,9 +10,9 @@ use super::{
 };
 
 const TILE_ANIMATION_MAX_SCALE: f32 = 1.3;
-const TILE_ANIMATION_STEP: f32 = 3.0;
+const TILE_ANIMATION_STEP: f32 = 5.0;
 const PATHFINDING_ANIMATION_DELAY_MS: u64 = 20;
-const PATHFINDING_TILE_BATCH: u64 = 25;
+const PATHFINDING_TILE_BATCH: u64 = 5;
 
 pub struct TileAnimationPlugin;
 
@@ -56,10 +56,10 @@ fn animate_tile(
             if let Some(material) = materials.get_mut(&mesh.0) {
                 match animate_state.last_event {
                     0 => {
-                        material.color = TEMP_TILE_COLOR_2;
+                        material.color = TEMP_TILE_COLOR_1;
                     }
                     1 => {
-                        material.color = TEMP_TILE_COLOR_1;
+                        material.color = TEMP_TILE_COLOR_2;
                     }
                     _ => {}
                 }

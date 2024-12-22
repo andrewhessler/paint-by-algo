@@ -28,7 +28,6 @@ fn emit_current_tile_as_activated(
             && player_position.y > tile_position.y - (TILE_SIZE / 2.);
 
         if is_in_x && is_in_y {
-            println!("row {} col {} active", tile.row, tile.col);
             tile_activated_writer.send(TileActivated { id: tile.id });
         }
     }

@@ -1,20 +1,23 @@
+
+
+### main.rs to Structure
 Entities consume components that apply systems, local systems shouldn't really know anything about their core component. 
-PlayerMovement systems don't know Player actually exists, just that PlayerMovement exists and 
-they can act on the entity containing that component (and unique global components like Transform).
-If PlayerMovement needs to know something about Player or some sister system, probably use events.
+`PlayerMovement` systems don't know `Player` actually exists, just that `PlayerMovement` exists and 
+they can act on the entity containing that component (and unique global components like `Transform`).
+If `PlayerMovement` needs to know something about `Player` or some sister system, probably use events. IDs are fine, too.
 
 Doing this, Entities pull in Systems through Components. Feels reverse of Domain Models being pulled up out of DBs. 
 Feels like data pulling in functionality, rather than functionality acting on data?
 
 
 `entities/` and `systems/` feels really on the nose, but I'm gonna try it. 
-Also feel like systems should live in entities since entities pulls them up, but I'm just gonna put them next to each other for now.
+Also feel like `systems/` should live in `entities/` since `entities/` pulls them up, but I'm just gonna put them next to each other for now.
 
 I guess I'm describing data-driven design, I think. That'd be cool. Or I'm being naive about it.
 
 
 
-
+### A Play
 Systems create Entities... 
 Young Simba: But, Dad, don't Components eat the Systems?
 Mufasa: Yes, Simba, but let me explain. When Components die, our bodies become the Entities, and the Systems eat the Entities. 
@@ -42,6 +45,7 @@ Also makes me curious if there'd be a better way to check than looping players a
 I just remembered that the player triggering the tiles isn't a long term state... well, it will still initiate the scan, so it's kind of like triggering a tile, so same thing I suppose.
 
 
+### Allow the Concept of the Tile
 I think I'm going to bring `Tile` into a `TileAnimation` system and it feels like it goes against what I've typed above. I'm scared, but I'm gonna let it cook.
 Maybe I'll go look at Events quick, but I feel like we're still going to need to know which Tile we're dealing with by checking current.
 
@@ -58,6 +62,9 @@ It'd be amazing if I'm wrong and just doing everything perfectly reasonably.
 Feel like this is pretty inaccurate now since I got these systems just pulling Entities willy nilly.
 
 Well, I feel a bit spaghetti'd. Might have to think on this.
+
+### Embrace the Events
+I don't think everything is better, but this feels good for now and I'm going to have to rediscover some pain points.
 
 If the setters just emit, then it happens once, and how I have it setup with the animation it runs once until cleared, so it'll clear on the next run. Might just work.
 
@@ -82,3 +89,4 @@ If they performed completely different animations that wouldn't be a big deal I 
 (as long as we check no other animation is running for the tile, but even then they could just overlap provided they act on different properties).
 
 
+### Time for Pathfinding

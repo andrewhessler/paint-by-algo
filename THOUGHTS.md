@@ -19,3 +19,33 @@ Systems create Entities...
 Young Simba: But, Dad, don't Components eat the Systems?
 Mufasa: Yes, Simba, but let me explain. When Components die, our bodies become the Entities, and the Systems eat the Entities. 
 And so we are all connected in the great Circle of Life.
+
+I originally named my `TileAnimation` component `AnimateTile`, all my Components are nouns, Systems verbs? Nope, I named `PlayerMovement` system `player_movement`. 
+`TileAnimation`'s main system is probably still going to be called `animate_tile`
+
+
+Visibility seems like a unique global component like Transform, so I guess I can modify it pretty directly?
+
+
+I just type these while I wait for it to compile.
+
+Ooo, plugins made of entirely system/systems, `set_current_tile` being the first, defining an interaction between `Tile` and `Player`.
+
+I think I have quite a lot of boilerplate, but it makes me feel organized a bit. Feel like if I knew more it could probably be cleaner.
+
+Had `set_current_tile` controlling tile animation, going to have the plugin have an event listening system, and see if I can have current tile announce itself?
+
+Maybe Player shouldn't be the only one who can set current tile and it should be all entities with a `TileSetter` component? 
+I think for simplicity I'll make it just the player. I'd have to change the function to be more general and allow for multiple currents...
+Also makes me curious if there'd be a better way to check than looping players and tiles.
+
+I just remembered that the player triggering the tiles isn't a long term state... well, it will still initiate the scan, so it's kind of like triggering a tile, so same thing I suppose.
+
+
+I think I'm going to bring `Tile` into a `TileAnimation` system and it feels like it goes against what I've typed above. I'm scared, but I'm gonna let it cook.
+Maybe I'll go look at Events quick, but I feel like we're still going to need to know which Tile we're dealing with by checking current.
+
+I could still try an event to trigger animate which will listen instead of polling the state of all tiles? But I don't think I'm getting the decoupling I want.
+The event thing kind of feels like a lot of boilerplate right now...
+
+

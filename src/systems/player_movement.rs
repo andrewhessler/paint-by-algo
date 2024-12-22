@@ -5,14 +5,19 @@ pub(crate) struct PlayerMovement {
     curr: TransformState,
     prev: TransformState,
     velocity: Vec2,
+    up_dir: Vec2,
 }
 
 impl PlayerMovement {
-    pub fn from_velocity(x: f32, y: f32) -> PlayerMovement {
+    pub fn from_velocity_and_up_direction(
+        velocity: (f32, f32),
+        up_direction: (f32, f32),
+    ) -> PlayerMovement {
         PlayerMovement {
             curr: TransformState::default(),
             prev: TransformState::default(),
-            velocity: Vec2::new(x, y),
+            velocity: Vec2::new(velocity.0, velocity.1),
+            up_dir: Vec2::new(up_direction.0, up_direction.1),
         }
     }
 }
@@ -54,6 +59,7 @@ fn player_movement(
             curr,
             prev,
             velocity,
+            up_dir,
         } = &mut *m;
         *prev = curr.clone();
         let mut direction = Vec2::ZERO;
@@ -83,7 +89,7 @@ fn player_movement(
         }
 
         if let Some(curr_rotation) = &mut curr.rotation {
-            let angle = direction.x.atan2(-direction.y);
+            let angle = up_dir.y.atan2(up_dir.x) - direction.x.atan2(direction.y);
             if direction != Vec2::ZERO {
                 *curr_rotation = Quat::from_rotation_z(angle);
             };
@@ -95,7 +101,7 @@ fn player_movement(
 
 fn transform_movement_interpolate(
     fixed_time: Res<Time<Fixed>>,
-    mut movement: Query<(&mut Transform, &mut PlayerMovement)>,
+    mut movement: Query<(&mut Transform, &PlayerMovement)>,
 ) {
     for (mut xf, state) in &mut movement {
         let a = fixed_time.overstep_fraction();

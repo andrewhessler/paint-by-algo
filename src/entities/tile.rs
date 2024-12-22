@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::entities::ground::{GROUND_L_BORDER, GROUND_T_BORDER};
+use crate::{
+    entities::ground::{GROUND_L_BORDER, GROUND_T_BORDER},
+    systems::tile_animation::TileAnimation,
+};
 
 use super::ground::{GROUND_H, GROUND_W};
 
@@ -8,17 +11,17 @@ const TEMP_TILE_COLOR_1: Color = Color::hsl(316., 0.31, 0.58);
 const TEMP_TILE_COLOR_2: Color = Color::hsl(225., 0.31, 0.38);
 const END_TILE_COLOR: Color = Color::hsl(360., 0.80, 0.50);
 
-const TILE_SIZE: f32 = 50.;
-const TILE_OFFSET: f32 = TILE_SIZE / 2.;
+pub const TILE_SIZE: f32 = 50.;
+pub const TILE_OFFSET: f32 = TILE_SIZE / 2.;
 const ROW_COUNT: i32 = (GROUND_H / TILE_SIZE) as i32;
 const COL_COUNT: i32 = (GROUND_W / TILE_SIZE) as i32;
 
 #[derive(Component, Debug)]
-struct Tile {
-    row: i32,
-    col: i32,
-    current: bool,
-    is_end: bool,
+pub struct Tile {
+    pub row: i32,
+    pub col: i32,
+    pub activated: bool,
+    pub is_end: bool,
 }
 
 impl Default for Tile {
@@ -26,7 +29,7 @@ impl Default for Tile {
         Tile {
             row: 0, // TODO: turn this into an option after system breakout, maybe
             col: 0, // TODO: turn this into an option after system breakout, maybe
-            current: false,
+            activated: false,
             is_end: false,
         }
     }
@@ -60,6 +63,8 @@ fn spawn_tile_grid(
             let mut is_end = false;
             let mut anim_enabled = true;
             if r == ROW_COUNT - 1 && c == COL_COUNT - 1 {
+                // ending tile, maybe find way to extract this into a component? Want to make it
+                // modifiable by user at runtime, should use an attribute for that, right?
                 visibility = Visibility::Visible;
                 is_end = true;
                 anim_enabled = false;
@@ -73,13 +78,10 @@ fn spawn_tile_grid(
                     is_end,
                     ..Default::default()
                 },
-                // AnimateTile {
-                //     enabled: anim_enabled,
-                //     growing: false,
-                //     shrinking: false,
-                //     initiated: false,
-                //     ran: false,
-                // },
+                TileAnimation {
+                    enabled: anim_enabled,
+                    ..Default::default()
+                },
                 Mesh2d(meshes.add(Rectangle::new(TILE_SIZE, TILE_SIZE))),
                 MeshMaterial2d(materials.add(tile_color)),
                 Transform::from_xyz(x_position, y_position, 0.5),

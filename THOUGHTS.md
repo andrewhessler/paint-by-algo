@@ -69,3 +69,16 @@ IDs for my tiles beyond row col? I like that.
 
 Got tile activation working through Events! Next we calculate some paths and figure out how to activate them on a delay.
 
+Systems that perform actions like animation can consume events from systems that monitor for changes. 
+Maybe some day the `PlayerMovement` system will take in `WindEvent`s that can be emitted by `WindSystem` and `MovementEvent`s from `PlayerInput`. 
+Or maybe both can write a `MovementEvent`. Interesting how that event would probably live with `PlayerMovement` and not `Player`, like `TileActivated` does. 
+Probably because there's only ever really one consumer, but I can see `TileActivated` having more than 1 consumer.
+And if not, then we could probably have more concretely made it some sort of `RequestTileAnimationEvent` that lives in `TileAnimation`.
+
+Should I be considering single-writer principle in this scenario, or intentionally breaking it? I already intentionally break it in real life...
+If I were to follow single-writer, I'd need to make `TileAnimation` listen on multiple topics, but manage the same state. Best they're ordered and funneled into a single event, right?
+
+If they performed completely different animations that wouldn't be a big deal I suppose 
+(as long as we check no other animation is running for the tile, but even then they could just overlap provided they act on different properties).
+
+

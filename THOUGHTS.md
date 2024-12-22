@@ -155,3 +155,5 @@ Really quick, long term want to add placing walls, water, moving the end, adding
 ### Algorithm and Animation Clean Up
 Put my Deques in a Vec and now I got ripples. There's probably a way better way to do this stuff. Gonna play with a second animation and look at the algorithm accuracy.
 Also may check how other people are doing their animations.
+
+Took ages to learn how to change the color of a tile. Need to read up on assets and handles more.

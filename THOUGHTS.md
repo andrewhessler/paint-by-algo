@@ -125,5 +125,5 @@ For now `emit_pathfinding` will handle actually calculating the path and control
 Should something like `CurrentTile` be on a timer or at least deduping? 
 We'll see if it causes issues. For now we have some local deduping in like `TileAnimation`, but should probably store previous_current locally and dedupe.
 
-Okay, deduping `CurrentTileEvent`s, I swear I'll actually do the pathfinding now. 
+Okay, deduping `CurrentTileEvent`s done, I swear I'll actually do the pathfinding now. 
 I'm going to let each algorithm read a collection of `Tile`s directly and spit out visit/checked with id.

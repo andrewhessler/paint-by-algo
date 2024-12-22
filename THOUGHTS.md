@@ -19,10 +19,14 @@ I guess I'm describing data-driven design, I think. That'd be cool. Or I'm being
 
 ### A Play
 Systems create Entities... 
+
 Young Simba: But, Dad, don't Components eat the Systems?
+
 Mufasa: Yes, Simba, but let me explain. When Components die, our bodies become the Entities, and the Systems eat the Entities. 
 And so we are all connected in the great Circle of Life.
 
+
+### Thank You 
 I originally named my `TileAnimation` component `AnimateTile`, all my Components are nouns, Systems verbs? Nope, I named `PlayerMovement` system `player_movement`. 
 `TileAnimation`'s main system is probably still going to be called `animate_tile`
 

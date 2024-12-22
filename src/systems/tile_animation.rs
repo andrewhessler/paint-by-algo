@@ -1,11 +1,15 @@
+use std::{collections::VecDeque, time::Duration};
+
 use bevy::prelude::*;
 
 use crate::entities::tile::Tile;
 
-use super::emit_current_tile::CurrentTileEvent;
+use super::{emit_current_tile::CurrentTileEvent, emit_pathfinding::PathfindingEvent};
 
 const TILE_ANIMATION_MAX_SCALE: f32 = 1.3;
 const TILE_ANIMATION_STEP: f32 = 3.0;
+const PATHFINDING_ANIMATION_DELAY_MS: u64 = 1;
+const PATHFINDING_TILE_BATCH: u64 = 25;
 
 pub struct TileAnimationPlugin;
 
@@ -20,10 +24,15 @@ pub struct TileAnimation {
 
 impl Plugin for TileAnimationPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            FixedUpdate,
-            (animate_tile, initiate_animation_by_activated_tile),
-        );
+        app.add_systems(Startup, setup_pathfinding_animation_timer)
+            .add_systems(
+                FixedUpdate,
+                (
+                    animate_tile,
+                    initiate_animation_by_current_tile,
+                    initiate_animation_by_pathfound_tile,
+                ),
+            );
     }
 }
 
@@ -65,7 +74,7 @@ fn animate_tile(
     }
 }
 
-fn initiate_animation_by_activated_tile(
+fn initiate_animation_by_current_tile(
     mut anim_states: Query<(&Tile, &mut TileAnimation)>,
     mut tile_activated_reader: EventReader<CurrentTileEvent>,
 ) {
@@ -79,6 +88,53 @@ fn initiate_animation_by_activated_tile(
                 if anim_state.ran == true {
                     anim_state.initiated = false;
                     anim_state.ran = false;
+                }
+            }
+        }
+    }
+}
+
+#[derive(Resource)]
+struct PathfindingAnimationGate {
+    pub timer: Timer,
+    pub event_queue: VecDeque<PathfindingEvent>,
+}
+
+fn setup_pathfinding_animation_timer(mut commands: Commands) {
+    commands.insert_resource(PathfindingAnimationGate {
+        timer: Timer::new(
+            Duration::from_millis(PATHFINDING_ANIMATION_DELAY_MS),
+            TimerMode::Repeating,
+        ),
+        event_queue: VecDeque::new(),
+    });
+}
+
+fn initiate_animation_by_pathfound_tile(
+    mut anim_states: Query<(&Tile, &mut TileAnimation)>,
+    mut tile_activated_reader: EventReader<PathfindingEvent>,
+    time: Res<Time>,
+    mut animation_gate: ResMut<PathfindingAnimationGate>,
+) {
+    for event in tile_activated_reader.read() {
+        animation_gate.event_queue.push_back(event.clone());
+    }
+    animation_gate.timer.tick(time.delta());
+
+    if animation_gate.timer.finished() {
+        for _ in 0..PATHFINDING_TILE_BATCH {
+            if let Some(event) = animation_gate.event_queue.pop_front() {
+                for (tile, mut anim_state) in &mut anim_states {
+                    if tile.id == event.tile_id {
+                        if anim_state.ran == false {
+                            anim_state.initiated = true;
+                        }
+                    } else {
+                        if anim_state.ran == true {
+                            anim_state.ran = false;
+                            anim_state.initiated = false;
+                        }
+                    }
                 }
             }
         }

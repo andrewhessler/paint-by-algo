@@ -10,7 +10,6 @@ use systems::tile_animation::TileAnimationPlugin;
 
 mod debug;
 mod entities;
-mod pathfinding_algorithms;
 mod systems;
 
 fn main() {

@@ -132,3 +132,10 @@ After I'm done doing this all with one animation, need to clean up animation so 
 
 I hate this.
 Maybe Tiles should live in a Grid.
+
+Should animations stay queued or be dropped?
+
+Everything in pathfinding event emitting feels wrong. I don't think I'll have a full picture of what I should do until I get back to TileAnimation. 
+I'll make this silly way work for now if I can.
+
+Going to naively wait to consume pathfinding events in `AnimateTile`. Probably have some issues with making the ripple smooth.

@@ -26,5 +26,15 @@ fn main() {
             PlayerMovementPlugin,
             TileAnimationPlugin,
         ))
+        .add_systems(PostStartup, print_entities)
         .run();
+}
+
+fn print_entities(world: &World, query: Query<Entity>) {
+    for entity in &query {
+        let components = world.inspect_entity(entity);
+        for component in components {
+            println!("{:?}", component);
+        }
+    }
 }

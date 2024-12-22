@@ -2,13 +2,16 @@ use std::{collections::VecDeque, time::Duration};
 
 use bevy::prelude::*;
 
-use crate::entities::tile::Tile;
+use crate::entities::tile::{Tile, TEMP_TILE_COLOR_1, TEMP_TILE_COLOR_2};
 
-use super::{emit_current_tile::CurrentTileEvent, emit_pathfinding::PathfindingEvent};
+use super::{
+    emit_current_tile::CurrentTileEvent,
+    emit_pathfinding::{PathfindingEvent, PathfindingEventType},
+};
 
 const TILE_ANIMATION_MAX_SCALE: f32 = 1.3;
 const TILE_ANIMATION_STEP: f32 = 3.0;
-const PATHFINDING_ANIMATION_DELAY_MS: u64 = 1;
+const PATHFINDING_ANIMATION_DELAY_MS: u64 = 20;
 const PATHFINDING_TILE_BATCH: u64 = 25;
 
 pub struct TileAnimationPlugin;
@@ -20,6 +23,7 @@ pub struct TileAnimation {
     pub shrinking: bool,
     pub initiated: bool,
     pub ran: bool,
+    pub last_event: u32,
 }
 
 impl Plugin for TileAnimationPlugin {
@@ -30,18 +34,36 @@ impl Plugin for TileAnimationPlugin {
                 (
                     animate_tile,
                     initiate_animation_by_current_tile,
-                    initiate_animation_by_pathfound_tile,
+                    // initiate_animation_by_pathfound_tile,
                 ),
-            );
+            )
+            .add_systems(Update, initiate_animation_by_pathfound_tile);
     }
 }
 
 fn animate_tile(
     time: Res<Time>,
-    mut tiles: Query<(&mut Transform, &mut TileAnimation, &mut Visibility)>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    mut tiles: Query<(
+        &mut Transform,
+        &mut TileAnimation,
+        &mut Visibility,
+        &MeshMaterial2d<ColorMaterial>,
+    )>,
 ) {
-    for (mut xf, mut animate_state, mut vis) in &mut tiles {
+    for (mut xf, mut animate_state, mut vis, mesh) in &mut tiles {
         if animate_state.initiated && !animate_state.ran && animate_state.enabled {
+            if let Some(material) = materials.get_mut(&mesh.0) {
+                match animate_state.last_event {
+                    0 => {
+                        material.color = TEMP_TILE_COLOR_2;
+                    }
+                    1 => {
+                        material.color = TEMP_TILE_COLOR_1;
+                    }
+                    _ => {}
+                }
+            }
             if *vis == Visibility::Hidden {
                 vis.toggle_visible_hidden();
             }
@@ -128,10 +150,15 @@ fn initiate_animation_by_pathfound_tile(
         for event_queue in &mut animation_gate.event_queues {
             for _ in 0..PATHFINDING_TILE_BATCH {
                 if let Some(event) = event_queue.pop_front() {
+                    let last_event: u32 = match event.event_type {
+                        PathfindingEventType::Visited => 0,
+                        PathfindingEventType::Checked => 1,
+                    };
                     for (tile, mut anim_state) in &mut anim_states {
                         if tile.id == event.tile_id {
                             if anim_state.ran == false {
                                 anim_state.initiated = true;
+                                anim_state.last_event = last_event;
                             }
                         } else {
                             if anim_state.ran == true {

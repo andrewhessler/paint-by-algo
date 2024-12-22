@@ -12,8 +12,8 @@ use crate::{
 
 use super::ground::{GROUND_H, GROUND_W};
 
-const TEMP_TILE_COLOR_1: Color = Color::hsl(316., 0.31, 0.58);
-const TEMP_TILE_COLOR_2: Color = Color::hsl(225., 0.31, 0.38);
+pub const TEMP_TILE_COLOR_1: Color = Color::hsl(316., 0.31, 0.58);
+pub const TEMP_TILE_COLOR_2: Color = Color::hsl(225., 0.31, 0.38);
 const END_TILE_COLOR: Color = Color::hsl(360., 0.80, 0.50);
 
 pub const TILE_SIZE: f32 = 50.;
@@ -40,17 +40,11 @@ impl Default for Tile {
     }
 }
 
-#[derive(Event)]
-pub struct TileActivated {
-    pub id: usize,
-}
-
 pub struct TilePlugin;
 
 impl Plugin for TilePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_tile_grid)
-            .add_event::<TileActivated>();
+        app.add_systems(Startup, spawn_tile_grid);
     }
 }
 

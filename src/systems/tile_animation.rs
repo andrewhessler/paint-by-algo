@@ -1,20 +1,11 @@
 use bevy::prelude::*;
 
-use crate::entities::tile::Tile;
+use crate::entities::tile::{Tile, TileActivated};
 
 const TILE_ANIMATION_MAX_SCALE: f32 = 1.3;
 const TILE_ANIMATION_STEP: f32 = 3.0;
 
 pub struct TileAnimationPlugin;
-
-impl Plugin for TileAnimationPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(
-            FixedUpdate,
-            (animate_tile, initiate_animation_by_activated_tile),
-        );
-    }
-}
 
 #[derive(Component, Default)]
 pub struct TileAnimation {
@@ -23,6 +14,15 @@ pub struct TileAnimation {
     pub shrinking: bool,
     pub initiated: bool,
     pub ran: bool,
+}
+
+impl Plugin for TileAnimationPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(
+            FixedUpdate,
+            (animate_tile, initiate_animation_by_activated_tile),
+        );
+    }
 }
 
 fn animate_tile(
@@ -63,16 +63,21 @@ fn animate_tile(
     }
 }
 
-fn initiate_animation_by_activated_tile(mut anim_states: Query<(&Tile, &mut TileAnimation)>) {
-    for (tile, mut anim_state) in &mut anim_states {
-        if tile.activated == true {
-            if anim_state.ran == false {
-                anim_state.initiated = true;
-            }
-        } else {
-            if anim_state.ran == true {
-                anim_state.initiated = false;
-                anim_state.ran = false;
+fn initiate_animation_by_activated_tile(
+    mut anim_states: Query<(&Tile, &mut TileAnimation)>,
+    mut tile_activated_reader: EventReader<TileActivated>,
+) {
+    for event in tile_activated_reader.read() {
+        for (tile, mut anim_state) in &mut anim_states {
+            if tile.id == event.id {
+                if anim_state.ran == false {
+                    anim_state.initiated = true;
+                }
+            } else {
+                if anim_state.ran == true {
+                    anim_state.initiated = false;
+                    anim_state.ran = false;
+                }
             }
         }
     }

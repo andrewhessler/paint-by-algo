@@ -48,4 +48,24 @@ Maybe I'll go look at Events quick, but I feel like we're still going to need to
 I could still try an event to trigger animate which will listen instead of polling the state of all tiles? But I don't think I'm getting the decoupling I want.
 The event thing kind of feels like a lot of boilerplate right now...
 
+My systems are communicating through Entity/Core Component properties (activated, I think so far only one system or orchestration is a writer). I wonder if that's a bad idea. Feel like doing these queries over and over may not be optimal either.
+Ah, but shoot, what if multiple events activate a tile; who's in charge of determining neither event is happening?
+
+It'd be amazing if I'm wrong and just doing everything perfectly reasonably.
+
+> Also feel like systems should live in entities since entities pulls them up, but I'm just gonna put them next to each other for now.
+
+Feel like this is pretty inaccurate now since I got these systems just pulling Entities willy nilly.
+
+Well, I feel a bit spaghetti'd. Might have to think on this.
+
+If the setters just emit, then it happens once, and how I have it setup with the animation it runs once until cleared, so it'll clear on the next run. Might just work.
+
+I'll turn the activated property into an activated event that has a payload of row/col, I suppose. `TileAnimation` already has to know about `Tile` so no loss there.
+
+Very tempting to name these event handlers "consumer/producers", Kafka for life. 
+
+IDs for my tiles beyond row col? I like that.
+
+Got tile activation working through Events! Next we calculate some paths and figure out how to activate them on a delay.
 

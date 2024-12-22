@@ -1,3 +1,5 @@
+use std::sync::atomic::{AtomicUsize, Ordering};
+
 use bevy::prelude::*;
 
 use crate::{
@@ -18,28 +20,34 @@ const COL_COUNT: i32 = (GROUND_W / TILE_SIZE) as i32;
 
 #[derive(Component, Debug)]
 pub struct Tile {
+    pub id: usize,
     pub row: i32,
     pub col: i32,
-    pub activated: bool,
     pub is_end: bool,
 }
 
 impl Default for Tile {
     fn default() -> Self {
         Tile {
+            id: get_tile_id(),
             row: 0, // TODO: turn this into an option after system breakout, maybe
             col: 0, // TODO: turn this into an option after system breakout, maybe
-            activated: false,
             is_end: false,
         }
     }
+}
+
+#[derive(Event)]
+pub struct TileActivated {
+    pub id: usize,
 }
 
 pub struct TilePlugin;
 
 impl Plugin for TilePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_tile_grid);
+        app.add_systems(Startup, spawn_tile_grid)
+            .add_event::<TileActivated>();
     }
 }
 
@@ -89,4 +97,9 @@ fn spawn_tile_grid(
             ));
         }
     }
+}
+
+static COUNTER: AtomicUsize = AtomicUsize::new(1);
+fn get_tile_id() -> usize {
+    COUNTER.fetch_add(1, Ordering::SeqCst)
 }

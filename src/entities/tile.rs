@@ -1,4 +1,7 @@
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::{
+    sync::atomic::{AtomicUsize, Ordering},
+    usize,
+};
 
 use bevy::prelude::*;
 
@@ -15,14 +18,14 @@ const END_TILE_COLOR: Color = Color::hsl(360., 0.80, 0.50);
 
 pub const TILE_SIZE: f32 = 50.;
 pub const TILE_OFFSET: f32 = TILE_SIZE / 2.;
-const ROW_COUNT: i32 = (GROUND_H / TILE_SIZE) as i32;
-const COL_COUNT: i32 = (GROUND_W / TILE_SIZE) as i32;
+pub const ROW_COUNT: usize = (GROUND_H / TILE_SIZE) as usize;
+pub const COL_COUNT: usize = (GROUND_W / TILE_SIZE) as usize;
 
 #[derive(Component, Debug)]
 pub struct Tile {
     pub id: usize,
-    pub row: i32,
-    pub col: i32,
+    pub row: usize,
+    pub col: usize,
     pub is_end: bool,
 }
 

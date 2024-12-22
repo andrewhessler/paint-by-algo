@@ -4,6 +4,7 @@ use entities::ground::GroundPlugin;
 use entities::player::PlayerPlugin;
 use entities::tile::TilePlugin;
 use systems::emit_current_tile::EmitCurrentTilePlugin;
+use systems::emit_pathfinding::EmitPathfindingPlugin;
 use systems::player_movement::PlayerMovementPlugin;
 use systems::tile_animation::TileAnimationPlugin;
 
@@ -19,11 +20,12 @@ fn main() {
         // Entities
         .add_plugins((PlayerPlugin, GroundPlugin, TilePlugin, SceneCameraPlugin))
         // ***************************************
-        // Systems and Interactions
+        // Systems: Monitors and Actions
         .add_plugins((
+            EmitCurrentTilePlugin,
+            EmitPathfindingPlugin,
             PlayerMovementPlugin,
             TileAnimationPlugin,
-            EmitCurrentTilePlugin,
         ))
         .run();
 }

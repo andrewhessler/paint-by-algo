@@ -1,13 +1,12 @@
 use std::{
     collections::VecDeque,
-    fs::read,
     sync::atomic::{AtomicUsize, Ordering},
     time::Duration,
 };
 
 use bevy::prelude::*;
 
-use crate::entities::tile::{Tile, TEMP_TILE_COLOR_1, TEMP_TILE_COLOR_2};
+use crate::entities::tile::{Tile, TEMP_TILE_COLOR_1};
 
 use super::{
     emit_current_tile::CurrentTileEvent,
@@ -16,8 +15,8 @@ use super::{
 
 const TILE_ANIMATION_MAX_SCALE: f32 = 1.3;
 const TILE_ANIMATION_STEP: f32 = 5.0;
-const PATHFINDING_ANIMATION_DELAY_MS: u64 = 5;
-const PATHFINDING_TILE_BATCH: u64 = 1;
+const PATHFINDING_ANIMATION_DELAY_MS: u64 = 25;
+const PATHFINDING_TILE_BATCH: u64 = 5;
 
 pub struct TileAnimationPlugin;
 

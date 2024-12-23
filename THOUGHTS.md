@@ -156,4 +156,15 @@ Really quick, long term want to add placing walls, water, moving the end, adding
 Put my Deques in a Vec and now I got ripples. There's probably a way better way to do this stuff. Gonna play with a second animation and look at the algorithm accuracy.
 Also may check how other people are doing their animations.
 
-Took ages to learn how to change the color of a tile. Need to read up on assets and handles more.
+Took ages to learn how to change the color of a tile. Need to read up on assets and handles more. 
+Seems like if components are associated with an Asset, they old the handle to that Asset and you query for the handle.
+
+
+### Quicker Algorithm
+Rignt now I batch tile animations. I'm thinking about grabbing every checked leading up to a visited and batching that way instead of by count. 
+But I also wouldn't mind just a less noisy trail. Maybe see if there's something I did wrong with my algorithm
+
+I'm trying just emitting Visited... not sure what others did, still gotta go look at that repo.
+
+Okay, doing only `Visited` with exactly the color effect I want. The structure of Animation needs a lot of clarifying, that's probably next. 
+Also some day probably a config option for blipping visited.

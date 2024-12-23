@@ -95,7 +95,6 @@ fn dijkstra(
     ];
 
     while let Some(mut node) = heap.pop() {
-        println!("{:?}", node);
         if node.visited == true {
             continue;
         }
@@ -120,13 +119,18 @@ fn dijkstra(
                 continue;
             }
 
+            let directional_distance = if row_offset.abs() + col_offset.abs() == 2 {
+                14
+            } else {
+                10
+            };
+
             let checked_node = &mut nodes[visit_row][visit_col];
-            println!("{}", node.distance);
-            let new_distance = node.distance + 1;
-            event_order.push(PathfindingEvent {
-                tile_id: checked_node.tile_id,
-                event_type: PathfindingEventType::Checked,
-            });
+            let new_distance = node.distance + directional_distance;
+            // event_order.push(PathfindingEvent {
+            //     tile_id: checked_node.tile_id,
+            //     event_type: PathfindingEventType::Checked,
+            // });
 
             if new_distance < checked_node.distance {
                 checked_node.distance = new_distance;

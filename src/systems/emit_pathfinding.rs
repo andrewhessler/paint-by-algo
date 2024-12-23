@@ -35,6 +35,7 @@ fn trigger_pathfinding(
     let tiles: Vec<&Tile> = tiles.iter().collect();
     for current_tile_event in current_tile_reader.read() {
         let pathfinding_events = setup_and_run_dijkstra(&tiles, current_tile_event.id);
+        println!("Emitting {} pathfinding events", pathfinding_events.len());
         for event in pathfinding_events {
             pathfinding_writer.send(event);
         }

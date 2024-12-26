@@ -67,7 +67,7 @@ fn spawn_tile_grid(
             let mut visibility = Visibility::Hidden;
             let mut is_end = false;
             let mut anim_enabled = true;
-            if r == ROW_COUNT - 1 && c == COL_COUNT - 1 {
+            if r == ROW_COUNT - (ROW_COUNT / 2) && c == COL_COUNT - (COL_COUNT / 2) {
                 // ending tile, maybe find way to extract this into a component? Want to make it
                 // modifiable by user at runtime, should use an attribute for that, right?
                 visibility = Visibility::Visible;

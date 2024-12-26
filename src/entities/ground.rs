@@ -2,8 +2,8 @@ use bevy::prelude::*;
 
 const GROUND_COLOR: Color = Color::srgb(0.0, 0.0, 0.0);
 
-pub(crate) const GROUND_W: f32 = 1200.;
-pub(crate) const GROUND_H: f32 = 600.;
+pub(crate) const GROUND_W: f32 = 3400.;
+pub(crate) const GROUND_H: f32 = 2000.;
 
 pub(crate) const GROUND_L_BORDER: f32 = -GROUND_W / 2.;
 pub(crate) const GROUND_T_BORDER: f32 = GROUND_H / 2.;

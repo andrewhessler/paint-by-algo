@@ -9,5 +9,8 @@ impl Plugin for SceneCameraPlugin {
 }
 
 fn spawn_camera(mut commands: Commands) {
-    commands.spawn(Camera2d);
+    let mut projection = OrthographicProjection::default_2d();
+    println!("Current projection scale {}", projection.scale);
+    projection.scale = 2.0;
+    commands.spawn((Camera2d, projection));
 }

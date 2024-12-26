@@ -26,7 +26,7 @@ fn main() {
             PlayerMovementPlugin,
             TileAnimationPlugin,
         ))
-        .add_systems(PostStartup, print_entities)
+        // .add_systems(PostStartup, print_entities)
         .run();
 }
 

@@ -5,6 +5,7 @@ use entities::player::PlayerPlugin;
 use entities::tile::TilePlugin;
 use systems::emit_current_tile::EmitCurrentTilePlugin;
 use systems::emit_pathfinding::EmitPathfindingPlugin;
+use systems::player_input::PlayerInputPlugin;
 use systems::player_movement::PlayerMovementPlugin;
 use systems::tile_animation::TileAnimationPlugin;
 
@@ -23,6 +24,7 @@ fn main() {
         .add_plugins((
             EmitCurrentTilePlugin,
             EmitPathfindingPlugin,
+            PlayerInputPlugin,
             PlayerMovementPlugin,
             TileAnimationPlugin,
         ))

@@ -168,3 +168,18 @@ I'm trying just emitting Visited... not sure what others did, still gotta go loo
 
 Okay, doing only `Visited` with exactly the color effect I want. The structure of Animation needs a lot of clarifying, that's probably next. 
 Also some day probably a config option for blipping visited.
+
+### I wanna add walls
+I really want people to be able to place Walls, but I think it will make developing that feature much more exciting if Walls already work.
+Oh, but first I should fix animation/everything structure.
+
+Starting with separating PlayerInput and PlayerMovement.
+
+I separated them out, but have butchered movement controls with how I consume them. 
+Probably track all 4 directions individually and evaluate them.
+
+Okay, so now my movement is smoother and you can't hit a combination of keys where you won't be moving even though you're holding down a key. 
+BUT, there's a W and A bias, instead of a last pressed bias.
+
+Okay, I got it so that "last press wins" and also "living presses continue", so holding A and then D, go D, then let go of D, start going A.
+Pretty sure the old way had the W/A bias as well. So this is an improvement, just not sure if there's a more readable way to do it.

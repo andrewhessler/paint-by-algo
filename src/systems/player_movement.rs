@@ -1,11 +1,23 @@
 use bevy::prelude::*;
 
+use super::player_input::{InputAction, PlayerInput};
+
 #[derive(Component)]
 pub(crate) struct PlayerMovement {
     curr: TransformState,
     prev: TransformState,
+    direction: Direction,
     velocity: Vec2,
     up_dir: Vec2,
+}
+
+#[derive(Default)]
+struct Direction {
+    vector: Vec2,
+    up: bool,
+    down: bool,
+    right: bool,
+    left: bool,
 }
 
 impl PlayerMovement {
@@ -16,6 +28,7 @@ impl PlayerMovement {
         PlayerMovement {
             curr: TransformState::default(),
             prev: TransformState::default(),
+            direction: Direction::default(),
             velocity: Vec2::new(velocity.0, velocity.1),
             up_dir: Vec2::new(up_direction.0, up_direction.1),
         }
@@ -41,16 +54,80 @@ pub struct PlayerMovementPlugin;
 
 impl Plugin for PlayerMovementPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, player_movement)
-            .add_systems(Update, transform_movement_interpolate);
+        app.add_systems(FixedUpdate, player_movement).add_systems(
+            Update,
+            (
+                transform_movement_interpolate,
+                set_player_direction_from_input,
+            ),
+        );
     }
 }
 
-fn player_movement(
-    time: Res<Time>,
-    keys: Res<ButtonInput<KeyCode>>,
-    mut movement: Query<(&Transform, &mut PlayerMovement)>,
+fn set_player_direction_from_input(
+    mut player_input_event_reader: EventReader<PlayerInput>,
+    mut movement: Query<&mut PlayerMovement>,
 ) {
+    for event in player_input_event_reader.read() {
+        for mut m in movement.iter_mut() {
+            match event.action {
+                InputAction::Pressed => match event.key {
+                    KeyCode::KeyW => {
+                        m.direction.up = true;
+                        m.direction.vector.y = 1.0;
+                    }
+                    KeyCode::KeyS => {
+                        m.direction.down = true;
+                        m.direction.vector.y = -1.0;
+                    }
+                    KeyCode::KeyA => {
+                        m.direction.left = true;
+                        m.direction.vector.x = -1.0;
+                    }
+                    KeyCode::KeyD => {
+                        m.direction.right = true;
+                        m.direction.vector.x = 1.0;
+                    }
+                    _ => (),
+                },
+                InputAction::Released => match event.key {
+                    KeyCode::KeyW => {
+                        m.direction.up = false;
+                        m.direction.vector.y = -1.0;
+                    }
+                    KeyCode::KeyS => {
+                        m.direction.down = false;
+                        m.direction.vector.y = 1.0;
+                    }
+                    KeyCode::KeyA => {
+                        m.direction.left = false;
+                        m.direction.vector.x = 1.0;
+                    }
+                    KeyCode::KeyD => {
+                        m.direction.right = false;
+                        m.direction.vector.x = -1.0;
+                    }
+                    _ => (),
+                },
+            };
+            m.direction.vector.y = if !m.direction.up && !m.direction.down {
+                0.0
+            } else {
+                m.direction.vector.y
+            };
+
+            m.direction.vector.x = if !m.direction.left && !m.direction.right {
+                0.0
+            } else {
+                m.direction.vector.x
+            };
+
+            let _ = m.direction.vector.normalize();
+        }
+    }
+}
+
+fn player_movement(time: Res<Time>, mut movement: Query<(&Transform, &mut PlayerMovement)>) {
     for (xf, mut m) in &mut movement {
         if m.curr.position.is_none() {
             m.curr.position = Some(xf.translation);
@@ -58,39 +135,22 @@ fn player_movement(
         let PlayerMovement {
             curr,
             prev,
+            direction,
             velocity,
             up_dir,
         } = &mut *m;
         *prev = curr.clone();
-        let mut direction = Vec2::ZERO;
 
         if let Some(curr_position) = &mut curr.position {
-            if keys.pressed(KeyCode::KeyW) {
-                direction.y = 1.0;
-            }
-
-            if keys.pressed(KeyCode::KeyS) {
-                direction.y = -1.0;
-            }
-
-            if keys.pressed(KeyCode::KeyA) {
-                direction.x = -1.0;
-            }
-
-            if keys.pressed(KeyCode::KeyD) {
-                direction.x = 1.0;
-            }
-
-            if direction != Vec2::ZERO {
-                direction = direction.normalize();
-                curr_position.x += direction.x * velocity.x * time.delta_secs();
-                curr_position.y += direction.y * velocity.y * time.delta_secs();
+            if direction.vector != Vec2::ZERO {
+                curr_position.x += direction.vector.x * velocity.x * time.delta_secs();
+                curr_position.y += direction.vector.y * velocity.y * time.delta_secs();
             }
         }
 
         if let Some(curr_rotation) = &mut curr.rotation {
-            let angle = up_dir.y.atan2(up_dir.x) - direction.x.atan2(direction.y);
-            if direction != Vec2::ZERO {
+            let angle = up_dir.y.atan2(up_dir.x) - direction.vector.x.atan2(direction.vector.y);
+            if direction.vector != Vec2::ZERO {
                 *curr_rotation = Quat::from_rotation_z(angle);
             };
         } else {

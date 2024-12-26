@@ -1,3 +1,4 @@
+use animation::tile_animation::TileAnimationPlugin;
 use bevy::prelude::*;
 use entities::camera::SceneCameraPlugin;
 use entities::ground::GroundPlugin;
@@ -7,8 +8,8 @@ use systems::emit_current_tile::EmitCurrentTilePlugin;
 use systems::emit_pathfinding::EmitPathfindingPlugin;
 use systems::player_input::PlayerInputPlugin;
 use systems::player_movement::PlayerMovementPlugin;
-use systems::tile_animation::TileAnimationPlugin;
 
+mod animation;
 mod debug;
 mod entities;
 mod systems;

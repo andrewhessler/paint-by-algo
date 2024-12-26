@@ -167,7 +167,7 @@ But I also wouldn't mind just a less noisy trail. Maybe see if there's something
 I'm trying just emitting Visited... not sure what others did, still gotta go look at that repo.
 
 Okay, doing only `Visited` with exactly the color effect I want. The structure of Animation needs a lot of clarifying, that's probably next. 
-Also some day probably a config option for blipping visited.
+Also some day probably a config option for blipping `Checked`.
 
 ### I wanna add walls
 I really want people to be able to place Walls, but I think it will make developing that feature much more exciting if Walls already work.
@@ -183,3 +183,9 @@ BUT, there's a W and A bias, instead of a last pressed bias.
 
 Okay, I got it so that "last press wins" and also "living presses continue", so holding A and then D, go D, then let go of D, start going A.
 Pretty sure the old way had the W/A bias as well. So this is an improvement, just not sure if there's a more readable way to do it.
+
+### Animation structure thoughts
+Animation has specific events it consumes for and then runs the corresponding animation, so on the CurrentTileEvent, we run an animation... hmm, kind of already doing that.
+I might not mind the current structure. It's a reasonable amount of specific. I'll at least move it out into `animation/`.
+
+I guess next is a `Wall`.

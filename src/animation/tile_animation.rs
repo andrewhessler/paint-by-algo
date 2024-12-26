@@ -6,11 +6,12 @@ use std::{
 
 use bevy::prelude::*;
 
-use crate::entities::tile::{Tile, TEMP_TILE_COLOR_1};
-
-use super::{
-    emit_current_tile::CurrentTileEvent,
-    emit_pathfinding::{PathfindingEvent, PathfindingEventType},
+use crate::{
+    entities::tile::Tile,
+    systems::{
+        emit_current_tile::CurrentTileEvent,
+        emit_pathfinding::{PathfindingEvent, PathfindingEventType},
+    },
 };
 
 const TILE_ANIMATION_MAX_SCALE: f32 = 1.3;
@@ -61,13 +62,13 @@ fn animate_tile(
         if animate_state.initiated && !animate_state.ran && animate_state.enabled {
             if let Some(material) = materials.get_mut(&mesh.0) {
                 if animate_state.update_color {
-                    let color = (animate_state.color as f32);
+                    let color = animate_state.color as f32;
                     material.color = Color::hsl(color, 0.30, 0.73);
                 }
             }
             if *vis == Visibility::Hidden {
                 if let Some(material) = materials.get_mut(&mesh.0) {
-                    material.color = TEMP_TILE_COLOR_1
+                    material.color = Color::BLACK;
                 }
                 vis.toggle_visible_hidden();
             }

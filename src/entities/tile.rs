@@ -6,8 +6,8 @@ use std::{
 use bevy::prelude::*;
 
 use crate::{
+    animation::tile_animation::TileAnimation,
     entities::ground::{GROUND_L_BORDER, GROUND_T_BORDER},
-    systems::tile_animation::TileAnimation,
 };
 
 use super::ground::{GROUND_H, GROUND_W};

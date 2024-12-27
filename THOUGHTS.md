@@ -198,3 +198,7 @@ Also probably move End to being part of this `TileType` enum.
 Oh shoot, gonna need collision. Well, that'll probably take some time.
 
 I think I'll do something naive, like if you enter a `Wall` tile, you get knocked back. `CurrentTile` can include the tile type now and `PlayerMovement` can consume it.
+
+Okay, so create a `Collidable` component; on new `CurrentTileEvent` check if inside `Collidable`. 
+Emit `CollidedEvent` that specifies the angle from the origin the `Player` is to the `Collidable`.
+`PlayerMovement` consumes `CollidedEvent` and pushes the player back.

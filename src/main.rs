@@ -1,18 +1,32 @@
 use animation::tile_animation::TileAnimationPlugin;
 use bevy::prelude::*;
+use collision::collidable::CollidablePlugin;
 use entities::camera::SceneCameraPlugin;
 use entities::ground::GroundPlugin;
+use entities::player::player_input::PlayerInputPlugin;
+use entities::player::player_movement::PlayerMovementPlugin;
 use entities::player::PlayerPlugin;
+use entities::tile::emit_current_tile::EmitCurrentTilePlugin;
 use entities::tile::TilePlugin;
-use systems::emit_current_tile::EmitCurrentTilePlugin;
-use systems::emit_pathfinding::EmitPathfindingPlugin;
-use systems::player_input::PlayerInputPlugin;
-use systems::player_movement::PlayerMovementPlugin;
+use pathfinding::emit_pathfinding::EmitPathfindingPlugin;
 
-mod animation;
+mod animation {
+    pub mod tile_animation;
+}
+mod collision {
+    pub mod collidable;
+}
 mod debug;
-mod entities;
-mod systems;
+mod entities {
+    pub mod camera;
+    pub mod ground;
+    pub mod player;
+    pub mod tile;
+}
+mod pathfinding {
+    pub mod algorithms;
+    pub mod emit_pathfinding;
+}
 
 fn main() {
     App::new()
@@ -23,6 +37,7 @@ fn main() {
         // ***************************************
         // Systems: Monitors and Actions
         .add_plugins((
+            CollidablePlugin,
             EmitCurrentTilePlugin,
             EmitPathfindingPlugin,
             PlayerInputPlugin,

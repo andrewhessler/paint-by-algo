@@ -2,7 +2,7 @@ use std::{cmp::Ordering, collections::BinaryHeap};
 
 use crate::{
     entities::tile::{Tile, TileType, COL_COUNT, ROW_COUNT},
-    systems::emit_pathfinding::{PathfindingEvent, PathfindingEventType},
+    pathfinding::emit_pathfinding::{PathfindingEvent, PathfindingEventType},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]

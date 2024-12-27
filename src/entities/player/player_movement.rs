@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::collision::collidable::CollidedEvent;
+
 use super::player_input::{InputAction, PlayerInput};
 
 #[derive(Component)]
@@ -54,13 +56,14 @@ pub struct PlayerMovementPlugin;
 
 impl Plugin for PlayerMovementPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, player_movement).add_systems(
-            Update,
-            (
-                transform_movement_interpolate,
-                set_player_direction_from_input,
-            ),
-        );
+        app.add_systems(FixedUpdate, (player_movement, rebound_player))
+            .add_systems(
+                Update,
+                (
+                    transform_movement_interpolate,
+                    set_player_direction_from_input,
+                ),
+            );
     }
 }
 
@@ -123,6 +126,20 @@ fn set_player_direction_from_input(
             };
 
             let _ = m.direction.vector.normalize();
+        }
+    }
+}
+
+fn rebound_player(
+    mut collided_event_reader: EventReader<CollidedEvent>,
+    mut movement: Query<&mut PlayerMovement>,
+) {
+    for event in collided_event_reader.read() {
+        for mut p_mv in &mut movement {
+            if let Some(curr_position) = &mut p_mv.curr.position {
+                curr_position.y += 50. * event.rebound_direction.y;
+                curr_position.x += 50. * event.rebound_direction.x;
+            }
         }
     }
 }

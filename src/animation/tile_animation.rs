@@ -7,11 +7,8 @@ use std::{
 use bevy::prelude::*;
 
 use crate::{
-    entities::tile::Tile,
-    systems::{
-        emit_current_tile::CurrentTileEvent,
-        emit_pathfinding::{PathfindingEvent, PathfindingEventType},
-    },
+    entities::tile::{emit_current_tile::CurrentTileEvent, Tile},
+    pathfinding::emit_pathfinding::{PathfindingEvent, PathfindingEventType},
 };
 
 const TILE_ANIMATION_MAX_SCALE: f32 = 1.3;

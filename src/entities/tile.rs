@@ -7,6 +7,7 @@ use bevy::prelude::*;
 
 use crate::{
     animation::tile_animation::TileAnimation,
+    collision::collidable::Collidable,
     entities::ground::{GROUND_L_BORDER, GROUND_T_BORDER},
 };
 
@@ -22,7 +23,9 @@ pub const TILE_OFFSET: f32 = TILE_SIZE / 2.;
 pub const ROW_COUNT: usize = (GROUND_H / TILE_SIZE) as usize;
 pub const COL_COUNT: usize = (GROUND_W / TILE_SIZE) as usize;
 
-#[derive(Debug, PartialEq)]
+pub mod emit_current_tile;
+
+#[derive(Debug, Clone, PartialEq)]
 pub enum TileType {
     Open,
     End,
@@ -34,7 +37,6 @@ pub struct Tile {
     pub id: usize,
     pub row: usize,
     pub col: usize,
-    pub is_end: bool,
     pub tile_type: TileType,
 }
 
@@ -44,7 +46,6 @@ impl Default for Tile {
             id: get_tile_id(),
             row: 0, // TODO: turn this into an option after system breakout, maybe
             col: 0, // TODO: turn this into an option after system breakout, maybe
-            is_end: false,
             tile_type: TileType::Open,
         }
     }
@@ -77,7 +78,7 @@ fn spawn_tile_grid(
             let mut visibility = Visibility::Hidden;
             let mut anim_enabled = true;
             let mut tile_type = TileType::Open;
-            if r == ROW_COUNT - (ROW_COUNT / 2) && c == COL_COUNT - (COL_COUNT / 2) {
+            if r == ROW_COUNT - (ROW_COUNT / 2) + 3 && c == COL_COUNT - (COL_COUNT / 2) - 4 {
                 // ending tile, maybe find way to extract this into a component? Want to make it
                 // modifiable by user at runtime, should use an attribute for that, right?
                 visibility = Visibility::Visible;
@@ -92,11 +93,11 @@ fn spawn_tile_grid(
                 tile_color = WALL_COLOR; // algorithm works
             }
 
-            commands.spawn((
+            let mut entity = commands.spawn((
                 Tile {
                     row: r,
                     col: c,
-                    tile_type,
+                    tile_type: tile_type.clone(),
                     ..Default::default()
                 },
                 TileAnimation {
@@ -108,6 +109,10 @@ fn spawn_tile_grid(
                 Transform::from_xyz(x_position, y_position, 0.5),
                 visibility,
             ));
+
+            if tile_type == TileType::Wall {
+                entity.insert(Collidable);
+            }
         }
     }
 }

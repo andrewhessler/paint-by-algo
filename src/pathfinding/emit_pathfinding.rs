@@ -1,10 +1,8 @@
 use bevy::prelude::*;
 
-use crate::entities::tile::Tile;
+use crate::{entities::tile::emit_current_tile::CurrentTileEvent, entities::tile::Tile};
 
-use super::{
-    emit_current_tile::CurrentTileEvent, pathfinding_algorithms::dijkstra::setup_and_run_dijkstra,
-};
+use super::algorithms::dijkstra::setup_and_run_dijkstra;
 
 pub struct EmitPathfindingPlugin;
 

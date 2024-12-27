@@ -1,9 +1,11 @@
 use bevy::prelude::*;
-
-use crate::systems::player_movement::PlayerMovement;
+use player_movement::PlayerMovement;
 
 const PLAYER_COLOR: Color = Color::hsl(0., 1.0, 0.5);
 const PLAYER_SPEED: f32 = 300.;
+
+pub mod player_input;
+pub mod player_movement;
 
 #[derive(Component)]
 pub struct Player;

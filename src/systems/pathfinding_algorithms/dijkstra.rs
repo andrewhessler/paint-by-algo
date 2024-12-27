@@ -1,7 +1,7 @@
 use std::{cmp::Ordering, collections::BinaryHeap};
 
 use crate::{
-    entities::tile::{Tile, COL_COUNT, ROW_COUNT},
+    entities::tile::{Tile, TileType, COL_COUNT, ROW_COUNT},
     systems::emit_pathfinding::{PathfindingEvent, PathfindingEventType},
 };
 
@@ -10,6 +10,7 @@ struct Node {
     tile_id: usize,
     row: usize,
     col: usize,
+    is_wall: bool,
     distance: usize,
     visited: bool,
     previous_node: Option<(usize, usize)>,
@@ -32,6 +33,7 @@ impl Default for Node {
             tile_id: 0,
             row: 0,
             col: 0,
+            is_wall: false,
             distance: usize::MAX,
             visited: false,
             previous_node: None,
@@ -55,22 +57,28 @@ pub fn setup_and_run_dijkstra(grid: &[&Tile], current_tile_id: usize) -> Vec<Pat
     let mut nodes: Vec<Vec<Node>> = vec![vec![Node::default(); COL_COUNT]; ROW_COUNT];
 
     for tile in grid {
-        if tile.is_end {
+        if tile.tile_type == TileType::End {
             end_tile_pos = Some((tile.row, tile.col));
         }
 
         if tile.id == current_tile_id {
             current_tile_pos = (tile.row, tile.col);
         }
+
         let row = tile.row as usize;
         let col = tile.col as usize;
         nodes[row][col].from_tile(tile);
+
+        if tile.tile_type == TileType::Wall {
+            nodes[row][col].visited = true;
+            nodes[row][col].is_wall = true;
+        }
     }
 
     return dijkstra(nodes, current_tile_pos, end_tile_pos);
 }
 
-// Returns a vector of checked and visited events
+// Emits an individual Pathfinding event per visited node
 fn dijkstra(
     mut nodes: Vec<Vec<Node>>,
     current_tile_pos: (usize, usize),
@@ -95,7 +103,7 @@ fn dijkstra(
     ];
 
     while let Some(mut node) = heap.pop() {
-        if node.visited == true {
+        if node.visited == true || node.is_wall {
             continue;
         }
 
@@ -115,7 +123,10 @@ fn dijkstra(
             let visit_row = (node.row as isize + row_offset) as usize;
             let visit_col = (node.col as isize + col_offset) as usize;
 
-            if visit_row >= ROW_COUNT || visit_col >= COL_COUNT {
+            if visit_row >= ROW_COUNT
+                || visit_col >= COL_COUNT
+                || nodes[visit_row][visit_col].is_wall
+            {
                 continue;
             }
 

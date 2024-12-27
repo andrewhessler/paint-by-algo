@@ -15,11 +15,19 @@ use super::ground::{GROUND_H, GROUND_W};
 pub const TEMP_TILE_COLOR_1: Color = Color::hsl(117., 0.67, 0.58);
 pub const TEMP_TILE_COLOR_2: Color = Color::hsla(171., 0.35, 0.68, 0.50);
 const END_TILE_COLOR: Color = Color::hsl(360., 0.80, 0.50);
+const WALL_COLOR: Color = Color::hsl(0., 0.71, 0.19);
 
 pub const TILE_SIZE: f32 = 50.;
 pub const TILE_OFFSET: f32 = TILE_SIZE / 2.;
 pub const ROW_COUNT: usize = (GROUND_H / TILE_SIZE) as usize;
 pub const COL_COUNT: usize = (GROUND_W / TILE_SIZE) as usize;
+
+#[derive(Debug, PartialEq)]
+pub enum TileType {
+    Open,
+    End,
+    Wall,
+}
 
 #[derive(Component, Debug)]
 pub struct Tile {
@@ -27,6 +35,7 @@ pub struct Tile {
     pub row: usize,
     pub col: usize,
     pub is_end: bool,
+    pub tile_type: TileType,
 }
 
 impl Default for Tile {
@@ -36,6 +45,7 @@ impl Default for Tile {
             row: 0, // TODO: turn this into an option after system breakout, maybe
             col: 0, // TODO: turn this into an option after system breakout, maybe
             is_end: false,
+            tile_type: TileType::Open,
         }
     }
 }
@@ -65,22 +75,28 @@ fn spawn_tile_grid(
             };
 
             let mut visibility = Visibility::Hidden;
-            let mut is_end = false;
             let mut anim_enabled = true;
+            let mut tile_type = TileType::Open;
             if r == ROW_COUNT - (ROW_COUNT / 2) && c == COL_COUNT - (COL_COUNT / 2) {
                 // ending tile, maybe find way to extract this into a component? Want to make it
                 // modifiable by user at runtime, should use an attribute for that, right?
                 visibility = Visibility::Visible;
-                is_end = true;
+                tile_type = TileType::End;
+
                 anim_enabled = false;
                 tile_color = END_TILE_COLOR;
+            } else if r < 15 && r > 10 && c > 2 && c < 140 {
+                visibility = Visibility::Visible;
+                tile_type = TileType::Wall;
+                anim_enabled = true; // true for now because they shouldn't be touched if the
+                tile_color = WALL_COLOR; // algorithm works
             }
 
             commands.spawn((
                 Tile {
                     row: r,
                     col: c,
-                    is_end,
+                    tile_type,
                     ..Default::default()
                 },
                 TileAnimation {

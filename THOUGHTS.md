@@ -189,3 +189,12 @@ Animation has specific events it consumes for and then runs the corresponding an
 I might not mind the current structure. It's a reasonable amount of specific. I'll at least move it out into `animation/`.
 
 I guess next is a `Wall`.
+
+
+### Time for `Wall`
+I think I'm going to just make it an attribute and then in the future when I decide them at runtime I can have a listener that decorates them appropriately? 
+Also probably move End to being part of this `TileType` enum.
+
+Oh shoot, gonna need collision. Well, that'll probably take some time.
+
+I think I'll do something naive, like if you enter a `Wall` tile, you get knocked back. `CurrentTile` can include the tile type now and `PlayerMovement` can consume it.

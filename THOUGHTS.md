@@ -202,3 +202,7 @@ I think I'll do something naive, like if you enter a `Wall` tile, you get knocke
 Okay, so create a `Collidable` component; on new `CurrentTileEvent` check if inside `Collidable`. 
 Emit `CollidedEvent` that specifies the angle from the origin the `Player` is to the `Collidable`.
 `PlayerMovement` consumes `CollidedEvent` and pushes the player back.
+
+I think I like the rebounding, seems pretty decent to me, I think this way will result in some weird fun bounce houses.
+
+Next will be world wrapping and I guess `End` tile resetting the game.

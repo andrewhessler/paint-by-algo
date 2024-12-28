@@ -1,6 +1,7 @@
 use animation::tile_animation::TileAnimationPlugin;
 use bevy::prelude::*;
 use collision::collidable::CollidablePlugin;
+use debug::DebugPlugin;
 use entities::camera::SceneCameraPlugin;
 use entities::ground::GroundPlugin;
 use entities::player::player_input::PlayerInputPlugin;
@@ -36,6 +37,7 @@ fn main() {
         .add_plugins((PlayerPlugin, GroundPlugin, TilePlugin, SceneCameraPlugin))
         // ***************************************
         // Systems: Monitors and Actions
+        .add_plugins(DebugPlugin)
         .add_plugins((
             CollidablePlugin,
             EmitCurrentTilePlugin,

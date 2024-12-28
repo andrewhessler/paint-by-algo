@@ -36,7 +36,6 @@ fn emit_current_tile(
 
         if is_in_x && is_in_y {
             if prev_current_id.map_or(true, |id| id != tile.id) {
-                println!("NEW CURRENT TILE {}", tile.id);
                 *prev_current_id = Some(tile.id);
                 current_tile_writer.send(CurrentTileEvent { id: tile.id });
             }

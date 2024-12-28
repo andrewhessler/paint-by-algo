@@ -34,17 +34,21 @@ fn trigger_pathfinding_by_button(
     mut current_tile_reader: EventReader<CurrentTileEvent>,
     mut pathfinding_writer: EventWriter<PathfindingEvent>,
     mut current_tile_id: Local<usize>,
+    mut pre_calced_event_list: Local<Vec<PathfindingEvent>>,
 ) {
     for event in current_tile_reader.read() {
+        let tiles: Vec<&Tile> = tiles.iter().collect();
         *current_tile_id = event.id;
+        *pre_calced_event_list = setup_and_run_dijkstra(&tiles, *current_tile_id);
     }
-    let tiles: Vec<&Tile> = tiles.iter().collect();
     for input in player_input_reader.read() {
         if input.action == InputAction::Pressed && input.key == KeyCode::KeyJ {
-            let pathfinding_events = setup_and_run_dijkstra(&tiles, *current_tile_id);
-            println!("Emitting {} pathfinding events", pathfinding_events.len());
-            for event in pathfinding_events {
-                pathfinding_writer.send(event);
+            println!(
+                "Emitting {} pathfinding events",
+                pre_calced_event_list.len()
+            );
+            for event in pre_calced_event_list.iter() {
+                pathfinding_writer.send(event.clone());
             }
         }
     }

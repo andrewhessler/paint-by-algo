@@ -34,12 +34,8 @@ fn emit_collided_event(
                 let p_xf = *player;
                 let (tile_x, tile_y) = (xf.translation.x, xf.translation.y);
                 let (player_x, player_y) = (p_xf.translation.x, p_xf.translation.y);
-                println!("Tile pos: {}, {}", tile_x, tile_y);
-                println!("Player pos: {}, {}", player_x, player_y);
 
                 let rebound_direction = Vec2::new(player_x - tile_x, player_y - tile_y).normalize();
-
-                println!("Rebound Direction: {:?}", rebound_direction);
 
                 collided_event_writer.send(CollidedEvent { rebound_direction });
             }

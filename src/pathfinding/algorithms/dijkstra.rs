@@ -42,7 +42,7 @@ impl Default for Node {
 }
 
 impl Node {
-    fn from_tile(&mut self, tile: &Tile) {
+    pub fn from_tile(&mut self, tile: &Tile) {
         self.tile_id = tile.id;
         self.row = tile.row;
         self.col = tile.col;
@@ -120,13 +120,8 @@ fn dijkstra(
         });
 
         for (row_offset, col_offset) in directions {
-            println!(
-                "node row: {}, row_offset: {}, ROW_COUNT: {}",
-                node.row, row_offset, ROW_COUNT
-            );
             let visit_row = ((node.row + ROW_COUNT) as isize + row_offset) as usize % ROW_COUNT; // add row count to avoid negative index >.> <.<
             let visit_col = ((node.col + COL_COUNT) as isize + col_offset) as usize % COL_COUNT;
-            println!("visit_row: {}", visit_row);
 
             if nodes[visit_row][visit_col].is_wall {
                 continue;

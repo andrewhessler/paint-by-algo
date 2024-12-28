@@ -1,3 +1,5 @@
+[Pathfinding Pulse](https://github.com/user-attachments/assets/29ab2501-3498-4e22-be20-83119ef82d66)
+
 # Bevy Pathfinder
 
 Pathfinding looked like a fun project. Figured I'd use it to learn Bevy.

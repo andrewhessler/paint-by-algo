@@ -7,6 +7,8 @@ pub(crate) const GROUND_H: f32 = 2000.;
 
 pub(crate) const GROUND_L_BORDER: f32 = -GROUND_W / 2.;
 pub(crate) const GROUND_T_BORDER: f32 = GROUND_H / 2.;
+pub(crate) const GROUND_R_BORDER: f32 = GROUND_W / 2.;
+pub(crate) const GROUND_B_BORDER: f32 = -GROUND_H / 2.;
 
 #[derive(Component)]
 struct Ground;

@@ -185,7 +185,7 @@ Okay, I got it so that "last press wins" and also "living presses continue", so 
 Pretty sure the old way had the W/A bias as well. So this is an improvement, just not sure if there's a more readable way to do it.
 
 ### Animation structure thoughts
-Animation has specific events it consumes for and then runs the corresponding animation, so on the CurrentTileEvent, we run an animation... hmm, kind of already doing that.
+Animation has specific events it consumes for and then runs the corresponding animation, so on the `CurrentTileEvent`, we run an animation... hmm, kind of already doing that.
 I might not mind the current structure. It's a reasonable amount of specific. I'll at least move it out into `animation/`.
 
 I guess next is a `Wall`.
@@ -206,3 +206,16 @@ Emit `CollidedEvent` that specifies the angle from the origin the `Player` is to
 I think I like the rebounding, seems pretty decent to me, I think this way will result in some weird fun bounce houses.
 
 Next will be world wrapping and I guess `End` tile resetting the game.
+
+Maybe I'll make `WorldWrapping` super generic and it just checks everything with a `Transform`, that sounds like a bad idea...
+Maybe only the `Player` can wrap for now.
+
+Okay, world wrapping going great, a few hiccups with the interpolation movement, but got it figured out mostly.
+
+Next, make the end tile end game. Hmmm, this seems hard. Oh god, I might not do it. We'll save that for much later.
+Though, I might be upset about not handling it for everything right now? Oh well, shouldn't be too hard since it'll still be pretty isolated to the entities.
+
+### Pathfinding World Wrap
+Next, I want to see if I can make my pathfinding world wrap... I think I can do that if I just duplicate the grid on all 4 sides? Or do I have to do it on 9 sides?
+
+I should maybe start doing some profiling before I implement this.

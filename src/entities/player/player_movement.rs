@@ -1,6 +1,11 @@
 use bevy::prelude::*;
 
-use crate::collision::collidable::CollidedEvent;
+use crate::{
+    collision::collidable::CollidedEvent,
+    entities::ground::{
+        GROUND_B_BORDER, GROUND_H, GROUND_L_BORDER, GROUND_R_BORDER, GROUND_T_BORDER, GROUND_W,
+    },
+};
 
 use super::player_input::{InputAction, PlayerInput};
 
@@ -56,14 +61,16 @@ pub struct PlayerMovementPlugin;
 
 impl Plugin for PlayerMovementPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, (player_movement, rebound_player))
-            .add_systems(
-                Update,
-                (
-                    transform_movement_interpolate,
-                    set_player_direction_from_input,
-                ),
-            );
+        app.add_systems(
+            FixedUpdate,
+            (
+                player_movement,
+                rebound_player,
+                set_player_direction_from_input,
+                teleport_player_at_bounds,
+            ),
+        )
+        .add_systems(Update, (transform_movement_interpolate,));
     }
 }
 
@@ -144,6 +151,33 @@ fn rebound_player(
     }
 }
 
+fn teleport_player_at_bounds(mut movement: Query<(&mut Transform, &mut PlayerMovement)>) {
+    for (mut xf, mut state) in movement.iter_mut() {
+        let mut teleported = false;
+        if xf.translation.x > GROUND_R_BORDER {
+            xf.translation.x -= GROUND_W;
+            teleported = true;
+        }
+        if xf.translation.x < GROUND_L_BORDER {
+            xf.translation.x += GROUND_W;
+            teleported = true;
+        }
+        if xf.translation.y < GROUND_B_BORDER {
+            xf.translation.y += GROUND_H;
+            teleported = true;
+        }
+        if xf.translation.y > GROUND_T_BORDER {
+            xf.translation.y -= GROUND_H;
+            teleported = true;
+        }
+
+        if teleported {
+            state.curr.position = Some(xf.translation);
+            state.prev.position = Some(xf.translation);
+        }
+    }
+}
+
 fn player_movement(time: Res<Time>, mut movement: Query<(&Transform, &mut PlayerMovement)>) {
     for (xf, mut m) in &mut movement {
         if m.curr.position.is_none() {
@@ -178,9 +212,9 @@ fn player_movement(time: Res<Time>, mut movement: Query<(&Transform, &mut Player
 
 fn transform_movement_interpolate(
     fixed_time: Res<Time<Fixed>>,
-    mut movement: Query<(&mut Transform, &PlayerMovement)>,
+    mut movement: Query<(&mut Transform, &mut PlayerMovement)>,
 ) {
-    for (mut xf, state) in &mut movement {
+    for (mut xf, mut state) in &mut movement {
         let a = fixed_time.overstep_fraction();
 
         if let (Some(prev_position), Some(curr_position)) =

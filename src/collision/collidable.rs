@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::entities::{
     player::Player,
-    tile::{emit_current_tile::CurrentTileEvent, Tile},
+    tile::{emit_current::CurrentTileEvent, Tile},
 };
 
 #[derive(Event)]
@@ -29,7 +29,7 @@ fn emit_collided_event(
     player: Single<&Transform, With<Player>>,
 ) {
     for event in current_tile_reader.read() {
-        for (tile, xf) in tiles.iter() {
+        for (tile, xf) in &tiles {
             if tile.id == event.id {
                 let p_xf = *player;
                 let (tile_x, tile_y) = (xf.translation.x, xf.translation.y);

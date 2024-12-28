@@ -1,18 +1,18 @@
-use animation::tile_animation::TileAnimationPlugin;
+use animation::tile::TileAnimationPlugin;
 use bevy::prelude::*;
 use collision::collidable::CollidablePlugin;
 use debug::DebugPlugin;
 use entities::camera::SceneCameraPlugin;
 use entities::ground::GroundPlugin;
-use entities::player::player_input::PlayerInputPlugin;
-use entities::player::player_movement::PlayerMovementPlugin;
+use entities::player::input::PlayerInputPlugin;
+use entities::player::movement::PlayerMovementPlugin;
 use entities::player::PlayerPlugin;
-use entities::tile::emit_current_tile::EmitCurrentTilePlugin;
+use entities::tile::emit_current::EmitCurrentTilePlugin;
 use entities::tile::TilePlugin;
 use pathfinding::emit_pathfinding::EmitPathfindingPlugin;
 
 mod animation {
-    pub mod tile_animation;
+    pub mod tile;
 }
 mod collision {
     pub mod collidable;

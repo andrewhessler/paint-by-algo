@@ -7,7 +7,7 @@ use std::{
 use bevy::prelude::*;
 
 use crate::{
-    entities::tile::{emit_current_tile::CurrentTileEvent, Tile},
+    entities::tile::{emit_current::CurrentTileEvent, Tile, TileType},
     pathfinding::emit_pathfinding::{PathfindingEvent, PathfindingEventType},
 };
 
@@ -104,12 +104,12 @@ fn initiate_animation_by_current_tile(
 ) {
     for event in tile_activated_reader.read() {
         for (tile, mut anim_state) in &mut anim_states {
-            if tile.id == event.id {
-                if anim_state.ran == false {
-                    anim_state.initiated = true;
-                }
-            } else {
-                if anim_state.ran == true {
+            if tile.tile_type == TileType::Wall {
+                if tile.id == event.id {
+                    if !anim_state.ran {
+                        anim_state.initiated = true;
+                    }
+                } else if anim_state.ran {
                     anim_state.initiated = false;
                     anim_state.ran = false;
                 }
@@ -183,11 +183,9 @@ fn initiate_animation_by_pathfound_tile(
                                 anim_state.initiated = true;
                                 anim_state.last_event = last_event;
                             }
-                        } else {
-                            if anim_state.ran == true {
-                                anim_state.ran = false;
-                                anim_state.initiated = false;
-                            }
+                        } else if anim_state.ran == true {
+                            anim_state.ran = false;
+                            anim_state.initiated = false;
                         }
                     }
                 }

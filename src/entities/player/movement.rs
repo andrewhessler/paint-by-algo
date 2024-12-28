@@ -7,7 +7,7 @@ use crate::{
     },
 };
 
-use super::player_input::{InputAction, PlayerInput};
+use super::input::{InputAction, PlayerInput};
 
 #[derive(Component)]
 pub(crate) struct PlayerMovement {
@@ -79,7 +79,7 @@ fn set_player_direction_from_input(
     mut movement: Query<&mut PlayerMovement>,
 ) {
     for event in player_input_event_reader.read() {
-        for mut m in movement.iter_mut() {
+        for mut m in &mut movement {
             match event.action {
                 InputAction::Pressed => match event.key {
                     KeyCode::KeyW => {
@@ -152,7 +152,7 @@ fn rebound_player(
 }
 
 fn teleport_player_at_bounds(mut movement: Query<(&mut Transform, &mut PlayerMovement)>) {
-    for (mut xf, mut state) in movement.iter_mut() {
+    for (mut xf, mut state) in &mut movement {
         let mut teleported = false;
         if xf.translation.x > GROUND_R_BORDER {
             xf.translation.x -= GROUND_W;
@@ -214,7 +214,7 @@ fn transform_movement_interpolate(
     fixed_time: Res<Time<Fixed>>,
     mut movement: Query<(&mut Transform, &mut PlayerMovement)>,
 ) {
-    for (mut xf, mut state) in &mut movement {
+    for (mut xf, state) in &mut movement {
         let a = fixed_time.overstep_fraction();
 
         if let (Some(prev_position), Some(curr_position)) =

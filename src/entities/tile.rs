@@ -1,12 +1,9 @@
-use std::{
-    sync::atomic::{AtomicUsize, Ordering},
-    usize,
-};
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use bevy::prelude::*;
 
 use crate::{
-    animation::tile_animation::TileAnimation,
+    animation::tile::TileAnimation,
     collision::collidable::Collidable,
     entities::ground::{GROUND_L_BORDER, GROUND_T_BORDER},
 };
@@ -23,7 +20,7 @@ pub const TILE_OFFSET: f32 = TILE_SIZE / 2.;
 pub const ROW_COUNT: usize = (GROUND_H / TILE_SIZE) as usize;
 pub const COL_COUNT: usize = (GROUND_W / TILE_SIZE) as usize;
 
-pub mod emit_current_tile;
+pub mod emit_current;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum TileType {

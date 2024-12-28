@@ -1,11 +1,11 @@
 use bevy::prelude::*;
-use player_movement::PlayerMovement;
+use movement::PlayerMovement;
 
 const PLAYER_COLOR: Color = Color::hsl(0., 1.0, 0.5);
 const PLAYER_SPEED: f32 = 300.;
 
-pub mod player_input;
-pub mod player_movement;
+pub mod input;
+pub mod movement;
 
 #[derive(Component)]
 pub struct Player;
@@ -28,6 +28,6 @@ fn spawn_player(
         PlayerMovement::from_velocity_and_up_direction((PLAYER_SPEED, PLAYER_SPEED), (-1., 0.)),
         Mesh2d(meshes.add(CircularSector::new(15., 0.7))),
         MeshMaterial2d(materials.add(PLAYER_COLOR)),
-        Transform::from_xyz(0., 0., 1.),
+        Transform::from_xyz(10.85, 10.10, 1.),
     ));
 }

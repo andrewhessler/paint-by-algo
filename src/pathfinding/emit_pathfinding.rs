@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
 use crate::entities::{
-    player::player_input::{InputAction, PlayerInput},
-    tile::{emit_current_tile::CurrentTileEvent, Tile},
+    player::input::{InputAction, PlayerInput},
+    tile::{emit_current::CurrentTileEvent, Tile},
 };
 
 use super::algorithms::dijkstra::setup_and_run_dijkstra;
@@ -47,7 +47,7 @@ fn trigger_pathfinding_by_button(
                 "Emitting {} pathfinding events",
                 pre_calced_event_list.len()
             );
-            for event in pre_calced_event_list.iter() {
+            for event in &pre_calced_event_list {
                 pathfinding_writer.send(event.clone());
             }
         }

@@ -219,3 +219,34 @@ Though, I might be upset about not handling it for everything right now? Oh well
 Next, I want to see if I can make my pathfinding world wrap... I think I can do that if I just duplicate the grid on all 4 sides? Or do I have to do it on 9 sides?
 
 I should maybe start doing some profiling before I implement this.
+
+Oh! Nevermind, I can just mod the index access by the row/col count.
+Well, after a bit of a silly struggle with converting a negative `isize` to a `usize`, World Wrap Pathfinding is working! Some day I'll make it configurable.
+
+I think I'm going to make it so you can trigger a calculation with a button press, instead of on current tile. 
+Time to go write a new event in `PlayerInput` and a new consumer over in `pathfinding/`.
+
+Ope, nevermind, just need a new consumer, `PlayerInput` pretty generous with the keys.
+
+It feels like cheating that all the updates are essentially synchronous. I'm probably doing this wrong, but feels like it's guaranteed events will be consumed in order.
+
+```rust
+fn trigger_pathfinding_by_button(
+    mut player_input_reader: EventReader<PlayerInput>,
+    mut current_tile_reader: EventReader<CurrentTileEvent>,
+) {
+    for event in current_tile_reader.read() {
+        // ...
+    }
+    for input in player_input_reader.read() {
+        // ...
+    }
+}
+```
+
+Alright, anyway. That's working great! Can now use `J` to pulse the pathfinding.
+
+Guess I should make some sort of starting UI to show the controls.
+
+### Opening Screen
+Feel like it's going to be a pain to make the world wait to spawn, still not sure the best way to go about that. Will probably relate to resetting.

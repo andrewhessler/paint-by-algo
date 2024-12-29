@@ -90,7 +90,6 @@ fn animate_tile(
 
             if anim.state == TileAnimationState::Growing {
                 xf.scale += TILE_ANIMATION_STEP * time.delta_secs();
-                println!("{}", TILE_ANIMATION_STEP + time.delta_secs());
             }
 
             if anim.state == TileAnimationState::Shrinking {

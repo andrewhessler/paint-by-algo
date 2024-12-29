@@ -274,3 +274,10 @@ Reworked pathfinding to send in a bundle, sort of. Should also change animation 
 ### No UI for now, boo UI, change algorithm on demand and add/remove walls
 For algorithm change on demand, listen for 1 or 2 input in `pathfinding/` I guess?
 
+Added an aggressive A* that cares way more about direction. I think it's all working with the world wrap, but sometimes I'm skeptical.
+
+Next walls, probably going to want to emit a `CurrentMouseTile`, animation to outline it in white. 
+Why not make a `wallbuilding/` module that will consume it and `PlayerInput`. 
+On left click, set current tile to Wall, on right click set current tile to OPEN.
+Then we'll have different build states, Wall/End, maybe look at adding multiple ends/no ends. 
+I'm gonna wanna add the ability to change individual tile colors some day...

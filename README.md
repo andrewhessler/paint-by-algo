@@ -9,7 +9,13 @@ Pathfinding looked like a fun project. Figured I'd use it to learn Bevy.
 
 WASD to move
 
-J to pulse pathfinding
+J - to pulse pathfinding
+
+
+Algorithms (Press Number to paint with)
+1 - Djikstra
+2 - AStar
+3 - AggressiveStar
 
 ## Roadmap
 

@@ -7,7 +7,11 @@ use crate::{
 
 use super::node::Node;
 
-pub fn setup_and_run_astar(grid: &[&Tile], current_tile_id: usize) -> Vec<PathfindingNode> {
+pub fn setup_and_run_astar(
+    grid: &[&Tile],
+    current_tile_id: usize,
+    is_aggressive: bool,
+) -> Vec<PathfindingNode> {
     let mut end_tile_pos: Option<(usize, usize)> = None;
     let mut current_tile_pos: (usize, usize) = (0, 0);
 
@@ -33,13 +37,14 @@ pub fn setup_and_run_astar(grid: &[&Tile], current_tile_id: usize) -> Vec<Pathfi
         }
     }
 
-    return astar(nodes, current_tile_pos, end_tile_pos);
+    return astar(nodes, current_tile_pos, end_tile_pos, is_aggressive);
 }
 
 fn astar(
     mut nodes: Vec<Vec<Node>>,
     current_tile_pos: (usize, usize),
     end_tile_pos: Option<(usize, usize)>,
+    is_aggressive: bool,
 ) -> Vec<PathfindingNode> {
     let mut heap = BinaryHeap::new();
     let mut event_order = vec![];
@@ -102,7 +107,12 @@ fn astar(
             directional_distance += distance_between_checked_and_end as usize;
 
             let checked_node = &mut nodes[visit_row][visit_col];
-            let new_distance = node.distance + directional_distance.pow(10);
+            let new_distance = node.distance
+                + if is_aggressive {
+                    directional_distance.pow(10)
+                } else {
+                    directional_distance * 10
+                };
             // event_order.push(PathfindingEvent {
             //     tile_id: checked_node.tile_id,
             //     event_type: PathfindingEventType::Checked,

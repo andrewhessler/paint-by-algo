@@ -3,7 +3,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use bevy::prelude::*;
 
 use crate::{
-    animation::tile::TileAnimation,
+    animation::tile::{TileAnimation, TileAnimationState},
     collision::collidable::Collidable,
     entities::ground::{GROUND_L_BORDER, GROUND_T_BORDER},
 };
@@ -73,7 +73,7 @@ fn spawn_tile_grid(
             };
 
             let mut visibility = Visibility::Hidden;
-            let mut anim_enabled = true;
+            let mut anim_enabled = TileAnimationState::Ran;
             let mut tile_type = TileType::Open;
             if r == ROW_COUNT - (ROW_COUNT / 2) && c == COL_COUNT - (COL_COUNT / 2) {
                 // ending tile, maybe find way to extract this into a component? Want to make it
@@ -81,13 +81,13 @@ fn spawn_tile_grid(
                 visibility = Visibility::Visible;
                 tile_type = TileType::End;
 
-                anim_enabled = false;
+                anim_enabled = TileAnimationState::Disabled;
                 tile_color = END_TILE_COLOR;
             } else if r < 15 && r > 10 && c > 2 && c < 140 {
                 visibility = Visibility::Visible;
                 tile_type = TileType::Wall;
-                anim_enabled = true; // true for now because they shouldn't be touched if the
-                tile_color = WALL_COLOR; // algorithm works
+                anim_enabled = TileAnimationState::Ran;
+                tile_color = WALL_COLOR;
             }
 
             let mut entity = commands.spawn((
@@ -98,7 +98,7 @@ fn spawn_tile_grid(
                     ..Default::default()
                 },
                 TileAnimation {
-                    enabled: anim_enabled,
+                    state: anim_enabled,
                     ..Default::default()
                 },
                 Mesh2d(meshes.add(Rectangle::new(TILE_SIZE, TILE_SIZE))),

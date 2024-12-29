@@ -271,3 +271,6 @@ But something is still wrong with my A*, I don't think it's making the correct s
 ### Change Algorithm on demand, maybe UI, maybe rework pathfinding to send events in a bundle
 Reworked pathfinding to send in a bundle, sort of. Should also change animation to using an enum.
 
+### No UI for now, boo UI, change algorithm on demand and add/remove walls
+For algorithm change on demand, listen for 1 or 2 input in `pathfinding/` I guess?
+

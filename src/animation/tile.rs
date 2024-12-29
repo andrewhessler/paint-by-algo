@@ -12,22 +12,34 @@ use crate::{
 };
 
 const TILE_ANIMATION_MAX_SCALE: f32 = 1.3;
-const TILE_ANIMATION_STEP: f32 = 5.0;
-const PATHFINDING_ANIMATION_DELAY_MS: u64 = 25;
+const TILE_ANIMATION_STEP: f32 = 3.0;
+const PATHFINDING_ANIMATION_DELAY_MS: u64 = 1;
 const PATHFINDING_TILE_BATCH: u64 = 5;
 
 pub struct TileAnimationPlugin;
 
 #[derive(Component, Default)]
 pub struct TileAnimation {
-    pub enabled: bool,
-    pub growing: bool,
-    pub shrinking: bool,
-    pub initiated: bool,
+    pub state: TileAnimationState,
     pub update_color: bool,
     pub color: usize,
-    pub ran: bool,
     pub last_event: u32,
+}
+
+#[derive(PartialEq)]
+pub enum TileAnimationState {
+    Disabled,
+    Idle,
+    Initiated,
+    Growing,
+    Shrinking,
+    Ran,
+}
+
+impl Default for TileAnimationState {
+    fn default() -> Self {
+        Self::Idle
+    }
 }
 
 impl Plugin for TileAnimationPlugin {
@@ -55,11 +67,14 @@ fn animate_tile(
         &MeshMaterial2d<ColorMaterial>,
     )>,
 ) {
-    for (mut xf, mut animate_state, mut vis, mesh) in &mut tiles {
-        if animate_state.initiated && !animate_state.ran && animate_state.enabled {
+    for (mut xf, mut anim, mut vis, mesh) in &mut tiles {
+        if anim.state == TileAnimationState::Initiated
+            || anim.state == TileAnimationState::Growing
+            || anim.state == TileAnimationState::Shrinking
+        {
             if let Some(material) = materials.get_mut(&mesh.0) {
-                if animate_state.update_color {
-                    let color = animate_state.color as f32;
+                if anim.update_color {
+                    let color = anim.color as f32;
                     material.color = Color::hsl(color, 0.30, 0.73);
                 }
             }
@@ -69,26 +84,25 @@ fn animate_tile(
                 }
                 vis.toggle_visible_hidden();
             }
-            if !animate_state.shrinking {
-                animate_state.growing = true;
+            if anim.state == TileAnimationState::Initiated {
+                anim.state = TileAnimationState::Growing;
             }
 
-            if animate_state.growing {
+            if anim.state == TileAnimationState::Growing {
                 xf.scale += TILE_ANIMATION_STEP * time.delta_secs();
+                println!("{}", TILE_ANIMATION_STEP + time.delta_secs());
             }
 
-            if animate_state.shrinking {
+            if anim.state == TileAnimationState::Shrinking {
                 xf.scale -= TILE_ANIMATION_STEP * time.delta_secs();
             }
 
             if xf.scale.y > TILE_ANIMATION_MAX_SCALE {
-                animate_state.growing = false;
-                animate_state.shrinking = true;
+                anim.state = TileAnimationState::Shrinking;
             }
 
             if xf.scale.y < 1. {
-                animate_state.shrinking = false;
-                animate_state.ran = true;
+                anim.state = TileAnimationState::Ran;
                 xf.scale = Vec3::new(1., 1., 1.);
                 // if *vis == Visibility::Visible {
                 //     vis.toggle_visible_hidden();
@@ -103,15 +117,12 @@ fn initiate_animation_by_current_tile(
     mut tile_activated_reader: EventReader<CurrentTileEvent>,
 ) {
     for event in tile_activated_reader.read() {
-        for (tile, mut anim_state) in &mut anim_states {
+        for (tile, mut anim) in &mut anim_states {
             if tile.tile_type == TileType::Wall {
                 if tile.id == event.id {
-                    if !anim_state.ran {
-                        anim_state.initiated = true;
+                    if anim.state == TileAnimationState::Ran {
+                        anim.state = TileAnimationState::Initiated;
                     }
-                } else if anim_state.ran {
-                    anim_state.initiated = false;
-                    anim_state.ran = false;
                 }
             }
         }
@@ -177,17 +188,14 @@ fn initiate_animation_by_pathfound_tile(
                         PathfindingEventType::Visited => 0,
                         PathfindingEventType::Checked => 1,
                     };
-                    for (tile, mut anim_state) in &mut anim_states {
+                    for (tile, mut anim) in &mut anim_states {
                         if tile.id == event.event.tile_id {
-                            if anim_state.ran == false {
-                                anim_state.update_color = true;
-                                anim_state.color = event.color;
-                                anim_state.initiated = true;
-                                anim_state.last_event = last_event;
+                            anim.update_color = true;
+                            anim.color = event.color;
+                            anim.last_event = last_event;
+                            if anim.state == TileAnimationState::Ran {
+                                anim.state = TileAnimationState::Initiated;
                             }
-                        } else if anim_state.ran == true {
-                            anim_state.ran = false;
-                            anim_state.initiated = false;
                         }
                     }
                 }

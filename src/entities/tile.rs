@@ -6,6 +6,7 @@ use crate::{
     animation::tile::{TileAnimation, TileAnimationState},
     collision::collidable::Collidable,
     entities::ground::{GROUND_L_BORDER, GROUND_T_BORDER},
+    wallbuilding::wall_manager::{WallAction, WallEvent},
 };
 
 use super::ground::{GROUND_H, GROUND_W};
@@ -13,7 +14,7 @@ use super::ground::{GROUND_H, GROUND_W};
 pub const TEMP_TILE_COLOR_1: Color = Color::hsl(117., 0.67, 0.58);
 pub const TEMP_TILE_COLOR_2: Color = Color::hsla(171., 0.35, 0.68, 0.50);
 const END_TILE_COLOR: Color = Color::hsl(360., 0.80, 0.50);
-const WALL_COLOR: Color = Color::hsl(0., 0.71, 0.19);
+pub const WALL_COLOR: Color = Color::hsl(0., 0.71, 0.19);
 
 pub const TILE_SIZE: f32 = 50.;
 pub const TILE_OFFSET: f32 = TILE_SIZE / 2.;
@@ -52,7 +53,8 @@ pub struct TilePlugin;
 
 impl Plugin for TilePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_tile_grid);
+        app.add_systems(Startup, spawn_tile_grid)
+            .add_systems(FixedUpdate, handle_wall_event);
     }
 }
 
@@ -109,6 +111,23 @@ fn spawn_tile_grid(
 
             if tile_type == TileType::Wall {
                 entity.insert(Collidable);
+            }
+        }
+    }
+}
+
+fn handle_wall_event(
+    mut commands: Commands,
+    mut walls_reader: EventReader<WallEvent>,
+    mut q_tiles: Query<(Entity, &mut Tile)>,
+) {
+    for event in walls_reader.read() {
+        for (entity_id, mut tile) in &mut q_tiles {
+            if event.action == WallAction::Added {
+                if event.tile_id == tile.id {
+                    tile.tile_type = TileType::Wall;
+                    commands.entity(entity_id).insert(Collidable);
+                }
             }
         }
     }

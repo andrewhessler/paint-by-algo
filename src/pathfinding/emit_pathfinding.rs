@@ -1,8 +1,11 @@
 use bevy::prelude::*;
 
-use crate::entities::{
-    player::input::{InputAction, PlayerInput},
-    tile::{emit_current::CurrentTileEvent, Tile},
+use crate::{
+    entities::{
+        player::input::{InputAction, PlayerInput, PlayerMouseInput},
+        tile::{emit_current::CurrentTileEvent, Tile},
+    },
+    wallbuilding::wall_manager::WallEvent,
 };
 
 use super::algorithms::{astar::setup_and_run_astar, dijkstra::setup_and_run_dijkstra, Algorithm};
@@ -48,12 +51,22 @@ fn setup_algo_in_use(mut commands: Commands) {
 fn trigger_pathfinding_by_button(
     tiles: Query<&Tile>,
     mut player_input_reader: EventReader<PlayerInput>,
+    mut wall_event_reader: EventReader<WallEvent>,
     mut current_tile_reader: EventReader<CurrentTileEvent>,
     mut pathfinding_writer: EventWriter<PathfindingEvent>,
     mut current_tile_id: Local<usize>,
     mut pre_calced_event_list: Local<Vec<PathfindingNode>>,
     mut algo: ResMut<AlgorithmInUse>,
 ) {
+    for _event in wall_event_reader.read() {
+        let tiles: Vec<&Tile> = tiles.iter().collect();
+        *pre_calced_event_list = match algo.name {
+            Algorithm::AStar => setup_and_run_astar(&tiles, *current_tile_id, false),
+            Algorithm::AgressiveStar => setup_and_run_astar(&tiles, *current_tile_id, true),
+            Algorithm::Dijkstra => setup_and_run_dijkstra(&tiles, *current_tile_id),
+        };
+    }
+
     for event in current_tile_reader.read() {
         let tiles: Vec<&Tile> = tiles.iter().collect();
         *current_tile_id = event.id;

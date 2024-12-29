@@ -11,6 +11,7 @@ use entities::player::PlayerPlugin;
 use entities::tile::emit_current::EmitCurrentTilePlugin;
 use entities::tile::TilePlugin;
 use pathfinding::emit_pathfinding::EmitPathfindingPlugin;
+use wallbuilding::wall_manager::WallManagerPlugin;
 
 mod animation {
     pub mod highlight_cursor_tile;
@@ -30,6 +31,9 @@ mod pathfinding {
     pub mod algorithms;
     pub mod emit_pathfinding;
 }
+mod wallbuilding {
+    pub mod wall_manager;
+}
 
 fn main() {
     App::new()
@@ -48,6 +52,7 @@ fn main() {
             PlayerInputPlugin,
             PlayerMovementPlugin,
             TileAnimationPlugin,
+            WallManagerPlugin,
         ))
         // .add_systems(PostStartup, print_entities)
         .run();

@@ -277,7 +277,18 @@ For algorithm change on demand, listen for 1 or 2 input in `pathfinding/` I gues
 Added an aggressive A* that cares way more about direction. I think it's all working with the world wrap, but sometimes I'm skeptical.
 
 Next walls, probably going to want to emit a `CurrentMouseTile`, animation to outline it in white. 
-Why not make a `wallbuilding/` module that will consume it and `PlayerInput`. 
+Why not make a `wallbuilding/` module that will consume `CurrentMouseTile` and `PlayerInput`. 
 On left click, set current tile to Wall, on right click set current tile to OPEN.
 Then we'll have different build states, Wall/End, maybe look at adding multiple ends/no ends. 
 I'm gonna wanna add the ability to change individual tile colors some day...
+
+
+Okay, everything is doing everything, I have made monolith spaghetti. `wallbuilding/` is just weird. 
+I should really do some diagramming, but at this point I just want to add things so oh well. The number of events is getting out of hand though.
+
+Ope nevermind, back to events lol
+
+Should I just be passing entity handles around? Does that mean if I delete something I could be acting on nothing? 
+But probably not because it uses some sort of reference counting?
+
+Left Click done, time for right click and then I can clean up the random wall.

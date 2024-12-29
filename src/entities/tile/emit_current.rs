@@ -75,8 +75,6 @@ fn emit_current_mouse_tile(
 
                 if is_in_x && is_in_y {
                     found = true;
-                    println!("tile position: {} {}", xf.translation.x, xf.translation.y);
-                    println!("mouse position {} {}", position.x, position.y);
                     if prev_current_id.map_or(true, |id| id != tile.id) {
                         *prev_current_id = Some(tile.id);
                         current_tile_writer.send(CurrentMouseTileEvent {

@@ -7,8 +7,9 @@ use std::{
 use bevy::prelude::*;
 
 use crate::{
-    entities::tile::{emit_current::CurrentTileEvent, Tile, TileType},
+    entities::tile::{emit_current::CurrentTileEvent, Tile, TileType, WALL_COLOR},
     pathfinding::emit_pathfinding::{PathfindingEvent, PathfindingEventType, PathfindingNode},
+    wallbuilding::wall_manager::{WallAction, WallEvent},
 };
 
 const TILE_ANIMATION_MAX_SCALE: f32 = 1.3;
@@ -49,7 +50,8 @@ impl Plugin for TileAnimationPlugin {
                 FixedUpdate,
                 (
                     animate_tile,
-                    initiate_animation_by_current_tile,
+                    initiate_wall_bump_tile_animation,
+                    handle_wall_event,
                     // initiate_animation_by_pathfound_tile,
                 ),
             )
@@ -111,7 +113,7 @@ fn animate_tile(
     }
 }
 
-fn initiate_animation_by_current_tile(
+fn initiate_wall_bump_tile_animation(
     mut anim_states: Query<(&Tile, &mut TileAnimation)>,
     mut tile_activated_reader: EventReader<CurrentTileEvent>,
 ) {
@@ -196,6 +198,31 @@ fn initiate_animation_by_pathfound_tile(
                                 anim.state = TileAnimationState::Initiated;
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn handle_wall_event(
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    mut walls_reader: EventReader<WallEvent>,
+    mut q_tiles: Query<(
+        &Tile,
+        &mut TileAnimation,
+        &MeshMaterial2d<ColorMaterial>,
+        &mut Visibility,
+    )>,
+) {
+    for event in walls_reader.read() {
+        for (tile, mut anim, mesh, mut vis) in &mut q_tiles {
+            if event.action == WallAction::Added {
+                if event.tile_id == tile.id {
+                    anim.state = TileAnimationState::Disabled;
+                    *vis = Visibility::Visible;
+                    if let Some(material) = materials.get_mut(&mesh.0) {
+                        material.color = WALL_COLOR;
                     }
                 }
             }

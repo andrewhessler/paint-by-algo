@@ -250,3 +250,19 @@ Guess I should make some sort of starting UI to show the controls.
 
 ### Opening Screen
 Feel like it's going to be a pain to make the world wait to spawn, still not sure the best way to go about that. Will probably relate to resetting.
+
+### Actually, Second Pathfinding Algorithm, A*?
+Probably A* because it's basically Dijkstra and I don't know any others yet.
+
+Added A*, tried to multiply the distance by a constant to hopefully punish distance more harshly. 
+
+There's still an issue where it can't see the end through the world wrap unless it naturally checks the edge. Then if the world wrap side is faster that will win.
+I think I can fix this by calculating distance to imaginary reflected end tiles. 
+
+This is actually apparently called "toirodal wrapping" and there are some ways to [calculate it](https://stackoverflow.com/a/3041398).
+
+And just grabbing from that answer, I drew it out to make sense of it. Since we're working in the context of a bounded plane, 
+if the distance on an axis (dx, dy) is larger than half the max value of the axis, then it must be more efficient to wrap. 
+Conveniently, the distance it must be if you wrap is the `max axis value` - `the unwrapped distance`.
+
+But something is still wrong with my A*, I don't think it's making the correct shape... Or maybe it is, world wrapping is just funny?

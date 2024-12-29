@@ -37,7 +37,7 @@ fn main() {
         .add_plugins((PlayerPlugin, GroundPlugin, TilePlugin, SceneCameraPlugin))
         // ***************************************
         // Systems: Monitors and Actions
-        .add_plugins(DebugPlugin)
+        // .add_plugins(DebugPlugin)
         .add_plugins((
             CollidablePlugin,
             EmitCurrentTilePlugin,

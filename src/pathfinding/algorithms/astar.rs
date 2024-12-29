@@ -1,19 +1,20 @@
-use super::node::Node;
-use std::collections::BinaryHeap;
+use std::{collections::BinaryHeap, isize};
 
 use crate::{
     entities::tile::{Tile, TileType, COL_COUNT, ROW_COUNT},
     pathfinding::emit_pathfinding::{PathfindingEvent, PathfindingEventType},
 };
 
-pub fn setup_and_run_dijkstra(tiles: &[&Tile], current_tile_id: usize) -> Vec<PathfindingEvent> {
+use super::node::Node;
+
+pub fn setup_and_run_astar(grid: &[&Tile], current_tile_id: usize) -> Vec<PathfindingEvent> {
     let mut end_tile_pos: Option<(usize, usize)> = None;
     let mut current_tile_pos: (usize, usize) = (0, 0);
 
     // This looks weird, probably want it dynamic some day.
     let mut nodes: Vec<Vec<Node>> = vec![vec![Node::default(); COL_COUNT]; ROW_COUNT];
 
-    for tile in tiles {
+    for tile in grid {
         if tile.tile_type == TileType::End {
             end_tile_pos = Some((tile.row, tile.col));
         }
@@ -32,11 +33,10 @@ pub fn setup_and_run_dijkstra(tiles: &[&Tile], current_tile_id: usize) -> Vec<Pa
         }
     }
 
-    return dijkstra(nodes, current_tile_pos, end_tile_pos);
+    return astar(nodes, current_tile_pos, end_tile_pos);
 }
 
-// Emits an individual Pathfinding event per visited node
-fn dijkstra(
+fn astar(
     mut nodes: Vec<Vec<Node>>,
     current_tile_pos: (usize, usize),
     end_tile_pos: Option<(usize, usize)>,
@@ -58,16 +58,15 @@ fn dijkstra(
         (0, -1),
         (-1, 0),
     ];
+    let end_pos = end_tile_pos.unwrap_or((0, 0));
 
     while let Some(mut node) = heap.pop() {
         if node.visited == true || node.is_wall {
             continue;
         }
 
-        if let Some(end_pos) = end_tile_pos {
-            if (node.row, node.col) == end_pos {
-                break;
-            }
+        if (node.row, node.col) == end_pos {
+            break;
         }
 
         node.visited = true;
@@ -84,11 +83,23 @@ fn dijkstra(
                 continue;
             }
 
-            let directional_distance = if row_offset.abs() + col_offset.abs() == 2 {
+            let mut directional_distance = if row_offset.abs() + col_offset.abs() == 2 {
                 14
             } else {
                 10
             };
+
+            let mut dx = end_pos.0 as isize - visit_row as isize;
+            let mut dy = end_pos.1 as isize - visit_col as isize;
+            if dx.abs() > COL_COUNT as isize / 2 {
+                dx = COL_COUNT as isize - dx.abs();
+            }
+            if dy.abs() > ROW_COUNT as isize / 2 {
+                dy = ROW_COUNT as isize - dy.abs();
+            }
+            let distance_between_checked_and_end = ((dx.pow(2) + dy.pow(2)) as f64).sqrt();
+
+            directional_distance += distance_between_checked_and_end as usize * 200;
 
             let checked_node = &mut nodes[visit_row][visit_col];
             let new_distance = node.distance + directional_distance;

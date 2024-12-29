@@ -5,7 +5,7 @@ use crate::entities::{
     tile::{emit_current::CurrentTileEvent, Tile},
 };
 
-use super::algorithms::dijkstra::setup_and_run_dijkstra;
+use super::algorithms::{astar::setup_and_run_astar, dijkstra::setup_and_run_dijkstra};
 
 pub struct EmitPathfindingPlugin;
 
@@ -39,7 +39,7 @@ fn trigger_pathfinding_by_button(
     for event in current_tile_reader.read() {
         let tiles: Vec<&Tile> = tiles.iter().collect();
         *current_tile_id = event.id;
-        *pre_calced_event_list = setup_and_run_dijkstra(&tiles, *current_tile_id);
+        *pre_calced_event_list = setup_and_run_astar(&tiles, *current_tile_id);
     }
     for input in player_input_reader.read() {
         if input.action == InputAction::Pressed && input.key == KeyCode::KeyJ {

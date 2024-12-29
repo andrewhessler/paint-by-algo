@@ -1,3 +1,4 @@
+use animation::highlight_cursor_tile::HighlightCursorTilePlugin;
 use animation::tile::TileAnimationPlugin;
 use bevy::prelude::*;
 use collision::collidable::CollidablePlugin;
@@ -12,6 +13,7 @@ use entities::tile::TilePlugin;
 use pathfinding::emit_pathfinding::EmitPathfindingPlugin;
 
 mod animation {
+    pub mod highlight_cursor_tile;
     pub mod tile;
 }
 mod collision {
@@ -42,6 +44,7 @@ fn main() {
             CollidablePlugin,
             EmitCurrentTilePlugin,
             EmitPathfindingPlugin,
+            HighlightCursorTilePlugin,
             PlayerInputPlugin,
             PlayerMovementPlugin,
             TileAnimationPlugin,

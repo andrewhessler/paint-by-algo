@@ -99,10 +99,10 @@ fn astar(
             }
             let distance_between_checked_and_end = ((dx.pow(2) + dy.pow(2)) as f64).sqrt();
 
-            directional_distance += distance_between_checked_and_end as usize * 200;
+            directional_distance += distance_between_checked_and_end as usize;
 
             let checked_node = &mut nodes[visit_row][visit_col];
-            let new_distance = node.distance + directional_distance;
+            let new_distance = node.distance + directional_distance.pow(10);
             // event_order.push(PathfindingEvent {
             //     tile_id: checked_node.tile_id,
             //     event_type: PathfindingEventType::Checked,

@@ -8,7 +8,7 @@ use bevy::prelude::*;
 
 use crate::{
     entities::tile::{emit_current::CurrentTileEvent, Tile, TileType},
-    pathfinding::emit_pathfinding::{PathfindingEvent, PathfindingEventType},
+    pathfinding::emit_pathfinding::{PathfindingEvent, PathfindingEventType, PathfindingNode},
 };
 
 const TILE_ANIMATION_MAX_SCALE: f32 = 1.3;
@@ -125,7 +125,7 @@ struct PathfindingAnimationGate {
 }
 
 pub struct AnimationFromPathfinding {
-    pub event: PathfindingEvent,
+    pub event: PathfindingNode,
     pub color: usize,
 }
 
@@ -157,10 +157,12 @@ fn initiate_animation_by_pathfound_tile(
     let mut new_animation = VecDeque::default();
     let color = read_calc_number();
     for event in pathfinding_event_reader.read() {
-        new_animation.push_back(AnimationFromPathfinding {
-            event: event.clone(),
-            color,
-        });
+        for node in &event.visited {
+            new_animation.push_back(AnimationFromPathfinding {
+                event: node.clone(),
+                color,
+            });
+        }
     }
 
     animation_gate.event_queues.push(new_animation);

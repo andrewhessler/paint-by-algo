@@ -18,6 +18,11 @@ impl Plugin for EmitPathfindingPlugin {
 
 #[derive(Event, Clone)]
 pub struct PathfindingEvent {
+    pub visited: Vec<PathfindingNode>,
+}
+
+#[derive(Clone)]
+pub struct PathfindingNode {
     pub tile_id: usize,
     pub event_type: PathfindingEventType,
 }
@@ -34,7 +39,7 @@ fn trigger_pathfinding_by_button(
     mut current_tile_reader: EventReader<CurrentTileEvent>,
     mut pathfinding_writer: EventWriter<PathfindingEvent>,
     mut current_tile_id: Local<usize>,
-    mut pre_calced_event_list: Local<Vec<PathfindingEvent>>,
+    mut pre_calced_event_list: Local<Vec<PathfindingNode>>,
 ) {
     for event in current_tile_reader.read() {
         let tiles: Vec<&Tile> = tiles.iter().collect();
@@ -47,24 +52,9 @@ fn trigger_pathfinding_by_button(
                 "Emitting {} pathfinding events",
                 pre_calced_event_list.len()
             );
-            for event in &pre_calced_event_list {
-                pathfinding_writer.send(event.clone());
-            }
-        }
-    }
-}
-
-fn trigger_pathfinding_by_current_tile(
-    tiles: Query<&Tile>,
-    mut current_tile_reader: EventReader<CurrentTileEvent>,
-    mut pathfinding_writer: EventWriter<PathfindingEvent>,
-) {
-    let tiles: Vec<&Tile> = tiles.iter().collect();
-    for current_tile_event in current_tile_reader.read() {
-        let pathfinding_events = setup_and_run_dijkstra(&tiles, current_tile_event.id);
-        println!("Emitting {} pathfinding events", pathfinding_events.len());
-        for event in pathfinding_events {
-            pathfinding_writer.send(event);
+            pathfinding_writer.send(PathfindingEvent {
+                visited: (*pre_calced_event_list).clone(),
+            });
         }
     }
 }

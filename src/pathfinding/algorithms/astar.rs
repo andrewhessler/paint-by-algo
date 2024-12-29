@@ -2,12 +2,12 @@ use std::{collections::BinaryHeap, isize};
 
 use crate::{
     entities::tile::{Tile, TileType, COL_COUNT, ROW_COUNT},
-    pathfinding::emit_pathfinding::{PathfindingEvent, PathfindingEventType},
+    pathfinding::emit_pathfinding::{PathfindingEventType, PathfindingNode},
 };
 
 use super::node::Node;
 
-pub fn setup_and_run_astar(grid: &[&Tile], current_tile_id: usize) -> Vec<PathfindingEvent> {
+pub fn setup_and_run_astar(grid: &[&Tile], current_tile_id: usize) -> Vec<PathfindingNode> {
     let mut end_tile_pos: Option<(usize, usize)> = None;
     let mut current_tile_pos: (usize, usize) = (0, 0);
 
@@ -40,7 +40,7 @@ fn astar(
     mut nodes: Vec<Vec<Node>>,
     current_tile_pos: (usize, usize),
     end_tile_pos: Option<(usize, usize)>,
-) -> Vec<PathfindingEvent> {
+) -> Vec<PathfindingNode> {
     let mut heap = BinaryHeap::new();
     let mut event_order = vec![];
     heap.push(Node {
@@ -70,7 +70,7 @@ fn astar(
         }
 
         node.visited = true;
-        event_order.push(PathfindingEvent {
+        event_order.push(PathfindingNode {
             tile_id: node.tile_id,
             event_type: PathfindingEventType::Visited,
         });

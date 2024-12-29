@@ -266,3 +266,8 @@ if the distance on an axis (dx, dy) is larger than half the max value of the axi
 Conveniently, the distance it must be if you wrap is the `max axis value` - `the unwrapped distance`.
 
 But something is still wrong with my A*, I don't think it's making the correct shape... Or maybe it is, world wrapping is just funny?
+
+
+### Change Algorithm on demand, maybe UI, maybe rework pathfinding to send events in a bundle
+Reworked pathfinding to send in a bundle, sort of. Should also change animation to using an enum.
+

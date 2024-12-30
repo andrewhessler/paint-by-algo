@@ -302,3 +302,8 @@ Use `E` and `R` to change between `BuildingState`, `End` and `Wall`, emit `Terra
 
 Okay, it's basically all following the rules, but following the rules feels like microservices. Anyway, moving `End` working, can also remove the `End`.
 Now to remove the default `Wall`s!
+
+Okay, moved the end to a corner, my A* world wrapping is definitely not working.
+
+
+### Next time, debug A*!

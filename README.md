@@ -12,18 +12,21 @@ WASD to move
 J - to pulse pathfinding
 ```
 
-
-
 Algorithms (Press Number to paint with)
 
 ```
-1 - Djikstra
+1 - Djikstra (Default)
 2 - AStar
 3 - AggressiveStar
+```
+
+Build Mode (Left Click builds...)
+```
+Wall - R (Default)
+End  - E
+Right-Click - Remove
 ```
 
 ## Roadmap
 
 1. Show `Path`
-1. Allow adding `Walls` with mouse
-1. Allow adding `Slow Tiles`

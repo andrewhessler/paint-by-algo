@@ -7,9 +7,11 @@ use std::{
 use bevy::prelude::*;
 
 use crate::{
-    entities::tile::{emit_current::CurrentTileEvent, Tile, TileType, WALL_COLOR},
+    entities::tile::{
+        emit_current::CurrentTileEvent, EndUpdatedEvent, Tile, TileType, END_TILE_COLOR, WALL_COLOR,
+    },
     pathfinding::emit_pathfinding::{PathfindingEvent, PathfindingEventType, PathfindingNode},
-    wallbuilding::wall_manager::{WallAction, WallEvent},
+    terrain::tile_modifier::{BuildType, TerrainAction, TerrainEvent},
 };
 
 const TILE_ANIMATION_MAX_SCALE: f32 = 1.3;
@@ -51,7 +53,7 @@ impl Plugin for TileAnimationPlugin {
                 (
                     animate_tile,
                     initiate_wall_bump_tile_animation,
-                    handle_wall_event,
+                    handle_terrain_event,
                     // initiate_animation_by_pathfound_tile,
                 ),
             )
@@ -84,7 +86,7 @@ fn animate_tile(
                 if let Some(material) = materials.get_mut(&mesh.0) {
                     material.color = Color::BLACK;
                 }
-                vis.toggle_visible_hidden();
+                *vis = Visibility::Visible;
             }
             if anim.state == TileAnimationState::Initiated {
                 anim.state = TileAnimationState::Growing;
@@ -205,9 +207,10 @@ fn initiate_animation_by_pathfound_tile(
     }
 }
 
-fn handle_wall_event(
+fn handle_terrain_event(
     mut materials: ResMut<Assets<ColorMaterial>>,
-    mut walls_reader: EventReader<WallEvent>,
+    mut terrain_reader: EventReader<TerrainEvent>,
+    mut end_reader: EventReader<EndUpdatedEvent>,
     mut q_tiles: Query<(
         &Tile,
         &mut TileAnimation,
@@ -215,18 +218,40 @@ fn handle_wall_event(
         &mut Visibility,
     )>,
 ) {
-    for event in walls_reader.read() {
-        for (tile, mut anim, mesh, mut vis) in &mut q_tiles {
-            if event.action == WallAction::Added {
-                if event.tile_id == tile.id {
+    for event in end_reader.read() {
+        if let Some(curr_end) = event.new_end_id {
+            for (tile, mut anim, mesh, mut vis) in &mut q_tiles {
+                if tile.id == curr_end {
                     anim.state = TileAnimationState::Disabled;
+                    *vis = Visibility::Visible;
+                    if let Some(material) = materials.get_mut(&mesh.0) {
+                        material.color = END_TILE_COLOR;
+                    }
+                }
+            }
+        }
+        if let Some(old_end) = event.old_end_id {
+            for (tile, mut anim, _mesh, mut vis) in &mut q_tiles {
+                if tile.id == old_end {
+                    anim.state = TileAnimationState::Ran;
+                    *vis = Visibility::Hidden;
+                }
+            }
+        }
+    }
+
+    for event in terrain_reader.read() {
+        for (tile, mut anim, mesh, mut vis) in &mut q_tiles {
+            if event.action == TerrainAction::Added && event.build_type != BuildType::End {
+                if event.tile_id == tile.id {
+                    anim.state = TileAnimationState::Ran;
                     *vis = Visibility::Visible;
                     if let Some(material) = materials.get_mut(&mesh.0) {
                         material.color = WALL_COLOR;
                     }
                 }
             }
-            if event.action == WallAction::Removed {
+            if event.action == TerrainAction::Removed {
                 if event.tile_id == tile.id {
                     anim.state = TileAnimationState::Ran;
                     *vis = Visibility::Hidden;

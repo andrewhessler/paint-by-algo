@@ -6,14 +6,14 @@ use crate::{
     animation::tile::{TileAnimation, TileAnimationState},
     collision::collidable::Collidable,
     entities::ground::{GROUND_L_BORDER, GROUND_T_BORDER},
-    wallbuilding::wall_manager::{WallAction, WallEvent},
+    terrain::tile_modifier::{BuildType, TerrainAction, TerrainEvent},
 };
 
 use super::ground::{GROUND_H, GROUND_W};
 
 pub const TEMP_TILE_COLOR_1: Color = Color::hsl(117., 0.67, 0.58);
 pub const TEMP_TILE_COLOR_2: Color = Color::hsla(171., 0.35, 0.68, 0.50);
-const END_TILE_COLOR: Color = Color::hsl(360., 0.80, 0.50);
+pub const END_TILE_COLOR: Color = Color::hsl(360., 0.80, 0.50);
 pub const WALL_COLOR: Color = Color::hsl(0., 0.71, 0.19);
 
 pub const TILE_SIZE: f32 = 50.;
@@ -28,6 +28,12 @@ pub enum TileType {
     Open,
     End,
     Wall,
+}
+
+#[derive(Event)]
+pub struct EndUpdatedEvent {
+    pub new_end_id: Option<usize>,
+    pub old_end_id: Option<usize>,
 }
 
 #[derive(Component, Debug)]
@@ -53,8 +59,9 @@ pub struct TilePlugin;
 
 impl Plugin for TilePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_tile_grid)
-            .add_systems(FixedUpdate, handle_wall_event);
+        app.add_event::<EndUpdatedEvent>()
+            .add_systems(Startup, spawn_tile_grid)
+            .add_systems(FixedUpdate, handle_terrain_event);
     }
 }
 
@@ -85,11 +92,6 @@ fn spawn_tile_grid(
 
                 anim_enabled = TileAnimationState::Disabled;
                 tile_color = END_TILE_COLOR;
-            } else if r < 15 && r > 10 && c > 2 && c < 140 {
-                visibility = Visibility::Visible;
-                tile_type = TileType::Wall;
-                anim_enabled = TileAnimationState::Ran;
-                tile_color = WALL_COLOR;
             }
 
             let mut entity = commands.spawn((
@@ -116,20 +118,38 @@ fn spawn_tile_grid(
     }
 }
 
-fn handle_wall_event(
+fn handle_terrain_event(
     mut commands: Commands,
-    mut walls_reader: EventReader<WallEvent>,
+    mut terrain_reader: EventReader<TerrainEvent>,
+    mut end_updated_writer: EventWriter<EndUpdatedEvent>,
     mut q_tiles: Query<(Entity, &mut Tile)>,
 ) {
-    for event in walls_reader.read() {
+    for event in terrain_reader.read() {
         for (entity_id, mut tile) in &mut q_tiles {
-            if event.action == WallAction::Added {
-                if event.tile_id == tile.id {
-                    tile.tile_type = TileType::Wall;
-                    commands.entity(entity_id).insert(Collidable);
+            let is_current_tile = event.tile_id == tile.id;
+            if event.action == TerrainAction::Added {
+                if is_current_tile {
+                    if event.build_type == BuildType::Wall {
+                        tile.tile_type = TileType::Wall;
+                        commands.entity(entity_id).insert(Collidable);
+                    }
+                    if event.build_type == BuildType::End {
+                        tile.tile_type = TileType::End;
+                        commands.entity(entity_id).remove::<Collidable>();
+                        end_updated_writer.send(EndUpdatedEvent {
+                            new_end_id: Some(tile.id),
+                            old_end_id: None,
+                        });
+                    }
+                } else if event.build_type == BuildType::End && tile.tile_type == TileType::End {
+                    tile.tile_type = TileType::Open;
+                    end_updated_writer.send(EndUpdatedEvent {
+                        new_end_id: None,
+                        old_end_id: Some(tile.id),
+                    });
                 }
-            } else if event.action == WallAction::Removed {
-                if event.tile_id == tile.id && tile.tile_type != TileType::End {
+            } else if event.action == TerrainAction::Removed {
+                if is_current_tile {
                     tile.tile_type = TileType::Open;
                     commands.entity(entity_id).remove::<Collidable>();
                 }

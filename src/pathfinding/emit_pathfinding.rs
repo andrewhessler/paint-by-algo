@@ -2,10 +2,10 @@ use bevy::prelude::*;
 
 use crate::{
     entities::{
-        player::input::{InputAction, PlayerInput, PlayerMouseInput},
+        player::input::{InputAction, PlayerInput},
         tile::{emit_current::CurrentTileEvent, Tile},
     },
-    wallbuilding::wall_manager::WallEvent,
+    terrain::tile_modifier::TerrainEvent,
 };
 
 use super::algorithms::{astar::setup_and_run_astar, dijkstra::setup_and_run_dijkstra, Algorithm};
@@ -63,14 +63,14 @@ fn run_algo(
 fn trigger_pathfinding_by_button(
     tiles: Query<&Tile>,
     mut player_input_reader: EventReader<PlayerInput>,
-    mut wall_event_reader: EventReader<WallEvent>,
+    mut terrain_event_reader: EventReader<TerrainEvent>,
     mut current_tile_reader: EventReader<CurrentTileEvent>,
     mut pathfinding_writer: EventWriter<PathfindingEvent>,
     mut current_tile_id: Local<usize>,
     mut pre_calced_event_list: Local<Vec<PathfindingNode>>,
     mut algo: ResMut<AlgorithmInUse>,
 ) {
-    for _event in wall_event_reader.read() {
+    for _event in terrain_event_reader.read() {
         let tiles: Vec<&Tile> = tiles.iter().collect();
         *pre_calced_event_list = run_algo(&*algo, &tiles, &*current_tile_id);
     }
@@ -101,7 +101,6 @@ fn trigger_pathfinding_by_button(
 
 fn set_algorithm_from_key_input(event: &PlayerInput, algo: &mut ResMut<AlgorithmInUse>) -> bool {
     if event.action == InputAction::Pressed {
-        println!("{:?}", event.key);
         if event.key == KeyCode::Digit1 {
             algo.name = Algorithm::Dijkstra;
             return true;

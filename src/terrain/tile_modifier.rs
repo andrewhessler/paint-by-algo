@@ -1,40 +1,62 @@
 use bevy::prelude::*;
 
-use crate::{
-    animation::tile::{TileAnimation, TileAnimationState},
-    collision::collidable::Collidable,
-    entities::{
-        player::input::{InputAction, PlayerMouseInput},
-        tile::{emit_current::CurrentMouseTileEvent, Tile, TileType, WALL_COLOR},
-    },
+use crate::entities::{
+    player::input::{InputAction, PlayerInput, PlayerMouseInput},
+    tile::{emit_current::CurrentMouseTileEvent, Tile, TileType},
 };
 
 #[derive(Event)]
-pub struct WallEvent {
+pub struct TerrainEvent {
     pub tile_id: usize,
-    pub action: WallAction,
+    pub build_type: BuildType,
+    pub action: TerrainAction,
 }
 
 #[derive(PartialEq)]
-pub enum WallAction {
+pub enum TerrainAction {
     Added,
     Removed,
 }
 
-pub struct WallManagerPlugin;
+#[derive(Resource, Copy, Clone, Debug, PartialEq)]
+pub enum BuildType {
+    Wall,
+    End,
+}
 
-impl Plugin for WallManagerPlugin {
+pub struct TileModifierPlugin;
+
+impl Plugin for TileModifierPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<WallEvent>()
-            .add_systems(FixedUpdate, manage_wall_placement);
+        app.add_event::<TerrainEvent>()
+            .insert_resource(BuildType::Wall)
+            .add_systems(FixedUpdate, (manage_wall_placement, manage_build_type));
+    }
+}
+
+fn manage_build_type(
+    mut build_type: ResMut<BuildType>,
+    mut player_input_reader: EventReader<PlayerInput>,
+) {
+    for event in player_input_reader.read() {
+        if event.action == InputAction::Pressed {
+            if event.key == KeyCode::KeyE {
+                *build_type = BuildType::End;
+            }
+
+            if event.key == KeyCode::KeyR {
+                *build_type = BuildType::Wall;
+            }
+        }
     }
 }
 
 fn manage_wall_placement(
-    mut q_tiles: Query<&Tile>,
+    q_tiles: Query<&Tile>,
+    build_state: Res<BuildType>,
     mut current_mouse_tile_reader: EventReader<CurrentMouseTileEvent>,
     mut player_mouse_input_reader: EventReader<PlayerMouseInput>,
-    mut wall_event_writer: EventWriter<WallEvent>,
+    mut wall_event_writer: EventWriter<TerrainEvent>,
     mut current_tile_id: Local<Option<usize>>,
     mut left_pressed: Local<bool>,
     mut right_pressed: Local<bool>,
@@ -60,22 +82,24 @@ fn manage_wall_placement(
     }
     if let Some(current_tile) = *current_tile_id {
         if *left_pressed {
-            for tile in &mut q_tiles {
+            for tile in &q_tiles {
                 if tile.id == current_tile && tile.tile_type != TileType::Wall {
-                    wall_event_writer.send(WallEvent {
+                    wall_event_writer.send(TerrainEvent {
                         tile_id: tile.id,
-                        action: WallAction::Added,
+                        build_type: *build_state,
+                        action: TerrainAction::Added,
                     });
                 }
             }
         }
 
         if *right_pressed {
-            for tile in &mut q_tiles {
+            for tile in &q_tiles {
                 if tile.id == current_tile && tile.tile_type == TileType::Wall {
-                    wall_event_writer.send(WallEvent {
+                    wall_event_writer.send(TerrainEvent {
                         tile_id: tile.id,
-                        action: WallAction::Removed,
+                        build_type: *build_state,
+                        action: TerrainAction::Removed,
                     });
                 }
             }

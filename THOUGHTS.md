@@ -299,3 +299,6 @@ We'll do moving the `End` next. And after that probably small guy that runs to t
 Use `E` and `R` to change between `BuildingState`, `End` and `Wall`, emit `TerrainEvent`s instead of `WallEvent`s.
 
 `Tile` is in charge of modifying attributes, `TileAnimation` is in charge of modifying visuals -- loosely...
+
+Okay, it's basically all following the rules, but following the rules feels like microservices. Anyway, moving `End` working, can also remove the `End`.
+Now to remove the default `Wall`s!

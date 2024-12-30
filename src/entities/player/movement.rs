@@ -141,11 +141,15 @@ fn rebound_player(
     mut collided_event_reader: EventReader<CollidedEvent>,
     mut movement: Query<&mut PlayerMovement>,
 ) {
-    for event in collided_event_reader.read() {
+    for _ in collided_event_reader.read() {
         for mut p_mv in &mut movement {
-            if let Some(curr_position) = &mut p_mv.curr.position {
-                curr_position.y += 50. * event.rebound_direction.y;
-                curr_position.x += 50. * event.rebound_direction.x;
+            if let Some(curr_rotation) = p_mv.curr.rotation.clone() {
+                if let Some(curr_position) = &mut p_mv.curr.position {
+                    let eu = curr_rotation.to_euler(EulerRot::XYZ);
+                    println!("x {}, y {}, z {}", eu.0, eu.1, eu.2);
+                    curr_position.x -= 50. * eu.2.sin();
+                    curr_position.y += 50. * eu.2.cos();
+                }
             }
         }
     }

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::entities::{
     player::input::{InputAction, PlayerInput, PlayerMouseInput},
-    tile::{emit_current::CurrentMouseTileEvent, Tile, TileType},
+    tile::{emit_current::CurrentMouseTileEvent, Tile, TileType, COL_COUNT, ROW_COUNT},
 };
 
 #[derive(Event)]
@@ -12,7 +12,7 @@ pub struct TerrainEvent {
     pub action: TerrainAction,
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum TerrainAction {
     Added,
     Removed,
@@ -30,7 +30,14 @@ impl Plugin for TileModifierPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<TerrainEvent>()
             .insert_resource(BuildType::Wall)
-            .add_systems(FixedUpdate, (manage_wall_placement, manage_build_type));
+            .add_systems(
+                FixedUpdate,
+                (
+                    manage_wall_placement,
+                    manage_build_type,
+                    build_walls_to_block_world_wrap,
+                ),
+            );
     }
 }
 
@@ -46,6 +53,38 @@ fn manage_build_type(
 
             if event.key == KeyCode::KeyR {
                 *build_type = BuildType::Wall;
+            }
+        }
+    }
+}
+
+fn build_walls_to_block_world_wrap(
+    q_tiles: Query<&Tile>,
+    mut player_input_reader: EventReader<PlayerInput>,
+    mut wall_event_writer: EventWriter<TerrainEvent>,
+    mut wall_active: Local<bool>,
+) {
+    for input in player_input_reader.read() {
+        if input.action == InputAction::Pressed && input.key == KeyCode::KeyZ {
+            let action = if *wall_active {
+                *wall_active = false;
+                TerrainAction::Removed
+            } else {
+                *wall_active = true;
+                TerrainAction::Added
+            };
+            for tile in &q_tiles {
+                if tile.row >= ROW_COUNT - 2
+                    || tile.row < 2
+                    || tile.col >= COL_COUNT - 2
+                    || tile.col < 2
+                {
+                    wall_event_writer.send(TerrainEvent {
+                        tile_id: tile.id,
+                        build_type: BuildType::Wall,
+                        action: action.clone(),
+                    });
+                }
             }
         }
     }

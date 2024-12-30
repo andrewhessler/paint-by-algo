@@ -22,9 +22,14 @@ Algorithms (Press Number to paint with)
 
 Build Mode (Left Click builds...)
 ```
-Wall - R (Default)
-End  - E
+R - Wall (Default)
+E - End
 Right-Click - Remove
+```
+
+Default Builds 
+```
+Z - Build Walls around edge of world wrap
 ```
 
 ## Roadmap

@@ -107,7 +107,7 @@ fn astar(
             directional_distance += if is_aggressive {
                 (distance_between_checked_and_end as usize).pow(10)
             } else {
-                (distance_between_checked_and_end as usize).pow(2)
+                (distance_between_checked_and_end as usize)
             };
 
             let checked_node = &mut nodes[visit_row][visit_col];

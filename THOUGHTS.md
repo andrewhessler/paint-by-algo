@@ -307,6 +307,11 @@ Okay, moved the end to a corner, my A* world wrapping is definitely not working.
 
 
 ### Next time, debug A*!
-I did debug A*, I'm a dumbie, dx is the change in column...
+I did debug A*, I'm a dumbie, dx is the change in column... 
 
 Next, I'm going to add a hotkey to surround the space in walls.
+
+Added that hotkey! And was able to do a ton more testing with it. 
+
+So `AggressiveStar` is apparently using an invalid heuristic since we give distance too much weight. I still like it, but made old A* not also crazy.
+

@@ -48,6 +48,18 @@ fn setup_algo_in_use(mut commands: Commands) {
     });
 }
 
+fn run_algo(
+    algo: &AlgorithmInUse,
+    tiles: &[&Tile],
+    current_tile_id: &usize,
+) -> Vec<PathfindingNode> {
+    match algo.name {
+        Algorithm::AStar => setup_and_run_astar(&tiles, *current_tile_id, false),
+        Algorithm::AgressiveStar => setup_and_run_astar(&tiles, *current_tile_id, true),
+        Algorithm::Dijkstra => setup_and_run_dijkstra(&tiles, *current_tile_id),
+    }
+}
+
 fn trigger_pathfinding_by_button(
     tiles: Query<&Tile>,
     mut player_input_reader: EventReader<PlayerInput>,
@@ -60,31 +72,20 @@ fn trigger_pathfinding_by_button(
 ) {
     for _event in wall_event_reader.read() {
         let tiles: Vec<&Tile> = tiles.iter().collect();
-        *pre_calced_event_list = match algo.name {
-            Algorithm::AStar => setup_and_run_astar(&tiles, *current_tile_id, false),
-            Algorithm::AgressiveStar => setup_and_run_astar(&tiles, *current_tile_id, true),
-            Algorithm::Dijkstra => setup_and_run_dijkstra(&tiles, *current_tile_id),
-        };
+        *pre_calced_event_list = run_algo(&*algo, &tiles, &*current_tile_id);
     }
 
     for event in current_tile_reader.read() {
         let tiles: Vec<&Tile> = tiles.iter().collect();
         *current_tile_id = event.id;
-        *pre_calced_event_list = match algo.name {
-            Algorithm::AStar => setup_and_run_astar(&tiles, *current_tile_id, false),
-            Algorithm::AgressiveStar => setup_and_run_astar(&tiles, *current_tile_id, true),
-            Algorithm::Dijkstra => setup_and_run_dijkstra(&tiles, *current_tile_id),
-        };
+        *pre_calced_event_list = run_algo(&*algo, &tiles, &*current_tile_id);
     }
+
     for input in player_input_reader.read() {
         let needs_recalc = set_algorithm_from_key_input(input, &mut algo);
         if needs_recalc {
             let tiles: Vec<&Tile> = tiles.iter().collect();
-            *pre_calced_event_list = match algo.name {
-                Algorithm::AStar => setup_and_run_astar(&tiles, *current_tile_id, false),
-                Algorithm::AgressiveStar => setup_and_run_astar(&tiles, *current_tile_id, true),
-                Algorithm::Dijkstra => setup_and_run_dijkstra(&tiles, *current_tile_id),
-            };
+            *pre_calced_event_list = run_algo(&*algo, &tiles, &*current_tile_id);
         }
         if input.action == InputAction::Pressed && input.key == KeyCode::KeyJ {
             println!(

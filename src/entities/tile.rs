@@ -128,6 +128,11 @@ fn handle_wall_event(
                     tile.tile_type = TileType::Wall;
                     commands.entity(entity_id).insert(Collidable);
                 }
+            } else if event.action == WallAction::Removed {
+                if event.tile_id == tile.id && tile.tile_type != TileType::End {
+                    tile.tile_type = TileType::Open;
+                    commands.entity(entity_id).remove::<Collidable>();
+                }
             }
         }
     }

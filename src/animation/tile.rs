@@ -226,6 +226,12 @@ fn handle_wall_event(
                     }
                 }
             }
+            if event.action == WallAction::Removed {
+                if event.tile_id == tile.id {
+                    anim.state = TileAnimationState::Ran;
+                    *vis = Visibility::Hidden;
+                }
+            }
         }
     }
 }

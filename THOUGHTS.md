@@ -292,3 +292,10 @@ Should I just be passing entity handles around? Does that mean if I delete somet
 But probably not because it uses some sort of reference counting?
 
 Left Click done, time for right click and then I can clean up the random wall.
+
+Right click probably good enough.
+
+We'll do moving the `End` next. And after that probably small guy that runs to the end. Probably change `wallbuilding/` to `tile_modifier/`
+Use `E` and `R` to change between `BuildingState`, `End` and `Wall`, emit `TerrainEvent`s instead of `WallEvent`s.
+
+`Tile` is in charge of modifying attributes, `TileAnimation` is in charge of modifying visuals -- loosely...

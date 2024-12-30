@@ -31,18 +31,13 @@ impl Plugin for WallManagerPlugin {
 }
 
 fn manage_wall_placement(
-    mut q_tiles: Query<(
-        Entity,
-        &Tile,
-        &MeshMaterial2d<ColorMaterial>,
-        &mut TileAnimation,
-    )>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
+    mut q_tiles: Query<&Tile>,
     mut current_mouse_tile_reader: EventReader<CurrentMouseTileEvent>,
     mut player_mouse_input_reader: EventReader<PlayerMouseInput>,
     mut wall_event_writer: EventWriter<WallEvent>,
     mut current_tile_id: Local<Option<usize>>,
     mut left_pressed: Local<bool>,
+    mut right_pressed: Local<bool>,
 ) {
     for event in current_mouse_tile_reader.read() {
         *current_tile_id = event.id;
@@ -55,19 +50,33 @@ fn manage_wall_placement(
         if event.key == MouseButton::Left && event.action == InputAction::Released {
             *left_pressed = false;
         }
+
+        if event.key == MouseButton::Right && event.action == InputAction::Pressed {
+            *right_pressed = true;
+        }
+        if event.key == MouseButton::Right && event.action == InputAction::Released {
+            *right_pressed = false;
+        }
     }
     if let Some(current_tile) = *current_tile_id {
         if *left_pressed {
-            for (entity, tile, color_handle, mut anim) in &mut q_tiles {
+            for tile in &mut q_tiles {
                 if tile.id == current_tile && tile.tile_type != TileType::Wall {
-                    if let Some(material) = materials.get_mut(&color_handle.0) {
-                        material.color = WALL_COLOR;
-                        anim.state = TileAnimationState::Disabled;
-                        wall_event_writer.send(WallEvent {
-                            tile_id: tile.id,
-                            action: WallAction::Added,
-                        });
-                    }
+                    wall_event_writer.send(WallEvent {
+                        tile_id: tile.id,
+                        action: WallAction::Added,
+                    });
+                }
+            }
+        }
+
+        if *right_pressed {
+            for tile in &mut q_tiles {
+                if tile.id == current_tile && tile.tile_type == TileType::Wall {
+                    wall_event_writer.send(WallEvent {
+                        tile_id: tile.id,
+                        action: WallAction::Removed,
+                    });
                 }
             }
         }

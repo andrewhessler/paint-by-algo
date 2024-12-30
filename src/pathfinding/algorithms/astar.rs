@@ -94,8 +94,8 @@ fn astar(
                 10
             };
 
-            let mut dx = end_pos.0 as isize - visit_row as isize;
-            let mut dy = end_pos.1 as isize - visit_col as isize;
+            let mut dx = end_pos.1 as isize - visit_col as isize;
+            let mut dy = end_pos.0 as isize - visit_row as isize;
             if dx.abs() > COL_COUNT as isize / 2 {
                 dx = COL_COUNT as isize - dx.abs();
             }
@@ -104,21 +104,36 @@ fn astar(
             }
             let distance_between_checked_and_end = ((dx.pow(2) + dy.pow(2)) as f64).sqrt();
 
-            directional_distance += distance_between_checked_and_end as usize;
+            directional_distance += if is_aggressive {
+                (distance_between_checked_and_end as usize).pow(10)
+            } else {
+                (distance_between_checked_and_end as usize).pow(2)
+            };
 
             let checked_node = &mut nodes[visit_row][visit_col];
-            let new_distance = node.distance
-                + if is_aggressive {
-                    directional_distance.pow(10)
-                } else {
-                    directional_distance * 10
-                };
+            let new_distance = node.distance + directional_distance;
             // event_order.push(PathfindingEvent {
             //     tile_id: checked_node.tile_id,
             //     event_type: PathfindingEventType::Checked,
             // });
 
             if new_distance < checked_node.distance {
+                if node.row == current_tile_pos.0 && node.col == current_tile_pos.1 {
+                    println!(
+                        "curr {}, {}, checked {}, {}, distance {}, end {}, {}, dx/dy {} {}, row/col {} {}",
+                        node.row,
+                        node.col,
+                        visit_row,
+                        visit_col,
+                        distance_between_checked_and_end,
+                        end_pos.0,
+                        end_pos.1,
+                        dx,
+                        dy,
+                        ROW_COUNT,
+                        COL_COUNT,
+                    );
+                }
                 checked_node.distance = new_distance;
                 checked_node.previous_node = Some((node.row, node.col));
                 checked_node.visited = false;

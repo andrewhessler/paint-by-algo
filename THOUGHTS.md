@@ -307,3 +307,6 @@ Okay, moved the end to a corner, my A* world wrapping is definitely not working.
 
 
 ### Next time, debug A*!
+I did debug A*, I'm a dumbie, dx is the change in column...
+
+Next, I'm going to add a hotkey to surround the space in walls.

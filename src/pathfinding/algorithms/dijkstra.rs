@@ -3,10 +3,13 @@ use std::collections::BinaryHeap;
 
 use crate::{
     entities::tile::{Tile, TileType, COL_COUNT, ROW_COUNT},
-    pathfinding::emit_pathfinding::{PathfindingEventType, PathfindingNode},
+    pathfinding::emit_pathfinding::PathfindingNode,
 };
 
-pub fn setup_and_run_dijkstra(tiles: &[&Tile], current_tile_id: usize) -> Vec<PathfindingNode> {
+pub fn setup_and_run_dijkstra(
+    tiles: &[&Tile],
+    current_tile_id: usize,
+) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     let mut end_tile_pos: Option<(usize, usize)> = None;
     let mut current_tile_pos: (usize, usize) = (0, 0);
 
@@ -40,9 +43,10 @@ fn dijkstra(
     mut nodes: Vec<Vec<Node>>,
     current_tile_pos: (usize, usize),
     end_tile_pos: Option<(usize, usize)>,
-) -> Vec<PathfindingNode> {
+) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     let mut heap = BinaryHeap::new();
-    let mut event_order = vec![];
+    let mut visited_order = vec![];
+    let mut path = vec![];
     heap.push(Node {
         distance: 0,
         ..nodes[current_tile_pos.0][current_tile_pos.1]
@@ -59,21 +63,19 @@ fn dijkstra(
         (-1, 0),
     ];
 
+    let end_pos = end_tile_pos.unwrap_or((0, 0));
     while let Some(mut node) = heap.pop() {
         if node.visited == true || node.is_wall {
             continue;
         }
 
-        if let Some(end_pos) = end_tile_pos {
-            if (node.row, node.col) == end_pos {
-                break;
-            }
+        if (node.row, node.col) == end_pos {
+            break;
         }
 
         node.visited = true;
-        event_order.push(PathfindingNode {
+        visited_order.push(PathfindingNode {
             tile_id: node.tile_id,
-            event_type: PathfindingEventType::Visited,
         });
 
         for (row_offset, col_offset) in directions {
@@ -105,5 +107,15 @@ fn dijkstra(
             }
         }
     }
-    return event_order;
+    let mut head = &nodes[end_pos.0][end_pos.1];
+    while let Some((row, col)) = head.previous_node {
+        path.push(PathfindingNode {
+            tile_id: head.tile_id,
+        });
+        head = &nodes[row][col];
+        if row == current_tile_pos.0 && col == current_tile_pos.1 {
+            break;
+        }
+    }
+    return (visited_order, path);
 }

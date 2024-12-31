@@ -44,8 +44,8 @@ impl PlayerMovement {
 
 #[derive(Clone)]
 struct TransformState {
-    position: Option<Vec3>,
-    rotation: Option<Quat>,
+    pub position: Option<Vec3>,
+    pub rotation: Option<Quat>,
 }
 
 impl Default for TransformState {
@@ -70,7 +70,7 @@ impl Plugin for PlayerMovementPlugin {
                 teleport_player_at_bounds,
             ),
         )
-        .add_systems(Update, (transform_movement_interpolate,));
+        .add_systems(Update, (transform_movement_interpolate));
     }
 }
 
@@ -146,7 +146,6 @@ fn rebound_player(
             if let Some(curr_rotation) = p_mv.curr.rotation.clone() {
                 if let Some(curr_position) = &mut p_mv.curr.position {
                     let eu = curr_rotation.to_euler(EulerRot::XYZ);
-                    println!("x {}, y {}, z {}", eu.0, eu.1, eu.2);
                     curr_position.x -= 50. * eu.2.sin();
                     curr_position.y += 50. * eu.2.cos();
                 }

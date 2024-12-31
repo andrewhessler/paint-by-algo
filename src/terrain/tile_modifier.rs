@@ -134,7 +134,7 @@ fn manage_wall_placement(
 
         if *right_pressed {
             for tile in &q_tiles {
-                if tile.id == current_tile && tile.tile_type == TileType::Wall {
+                if tile.id == current_tile {
                     wall_event_writer.send(TerrainEvent {
                         tile_id: tile.id,
                         build_type: *build_state,

@@ -150,8 +150,15 @@ fn handle_terrain_event(
                 }
             } else if event.action == TerrainAction::Removed {
                 if is_current_tile {
-                    tile.tile_type = TileType::Open;
-                    commands.entity(entity_id).remove::<Collidable>();
+                    if tile.tile_type != TileType::End {
+                        tile.tile_type = TileType::Open;
+                        commands.entity(entity_id).remove::<Collidable>();
+                    } else {
+                        end_updated_writer.send(EndUpdatedEvent {
+                            new_end_id: None,
+                            old_end_id: Some(tile.id),
+                        });
+                    }
                 }
             }
         }

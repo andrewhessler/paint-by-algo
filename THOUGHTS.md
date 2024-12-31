@@ -315,3 +315,29 @@ Added that hotkey! And was able to do a ton more testing with it.
 
 So `AggressiveStar` is apparently using an invalid heuristic since we give distance too much weight. I still like it, but made old A* not also crazy.
 
+
+### Time to work on `PathBee`
+Spawn little yellow guy, try to add bloom or something.
+Need to spawn, hidden. Need an animation counterpart. 
+Consume pathfinding and player input events.
+`H` to run PathBee animation.
+
+Plan: 
+1. Create `entities/path_bee`
+1. Spawn a little `PathBee` invisible
+1. Now, I'm torn. I feel like entities should produce to request their animation, but it doesn't seem strictly required. 
+I think I'm going to just have animation handle most of it. 
+1. Add `animation/path_bee`,
+
+Added a separate `PathEvent`, endless topics 😬
+
+I give up on `PathBee`, just moving to another tile animation.
+
+Oh that's way better, you can't paint with a bee.
+
+Alright, time for a break from continually working on this. I have all the features I want. I can come back and add wall generation and more algorithms when I want to.
+
+Off to something non-Bevy, websockets?
+
+
+

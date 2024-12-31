@@ -10,6 +10,7 @@ Pathfinding looked like a fun project. Figured I'd use it to learn Bevy.
 ```
 WASD to move
 J - to pulse pathfinding
+H - to highlight path
 ```
 
 Algorithms (Press Number to paint with)

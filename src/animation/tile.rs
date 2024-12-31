@@ -10,7 +10,9 @@ use crate::{
     entities::tile::{
         emit_current::CurrentTileEvent, EndUpdatedEvent, Tile, TileType, END_TILE_COLOR, WALL_COLOR,
     },
-    pathfinding::emit_pathfinding::{PathfindingEvent, PathfindingEventType, PathfindingNode},
+    pathfinding::emit_pathfinding::{
+        PathEvent, PathfindingEvent, PathfindingEventType, PathfindingNode,
+    },
     terrain::tile_modifier::{BuildType, TerrainAction, TerrainEvent},
 };
 
@@ -26,7 +28,6 @@ pub struct TileAnimation {
     pub state: TileAnimationState,
     pub update_color: bool,
     pub color: usize,
-    pub last_event: u32,
 }
 
 #[derive(PartialEq)]
@@ -52,7 +53,7 @@ impl Plugin for TileAnimationPlugin {
                 FixedUpdate,
                 (
                     animate_tile,
-                    initiate_wall_bump_tile_animation,
+                    // initiate_wall_bump_tile_animation,
                     handle_terrain_event,
                     // initiate_animation_by_pathfound_tile,
                 ),
@@ -165,11 +166,12 @@ fn read_calc_number() -> usize {
 fn initiate_animation_by_pathfound_tile(
     mut anim_states: Query<(&Tile, &mut TileAnimation)>,
     mut pathfinding_event_reader: EventReader<PathfindingEvent>,
+    mut path_event_reader: EventReader<PathEvent>,
     time: Res<Time>,
     mut animation_gate: ResMut<PathfindingAnimationGate>,
 ) {
     let mut new_animation = VecDeque::default();
-    let color = read_calc_number();
+    let color = get_calc_number();
     for event in pathfinding_event_reader.read() {
         for node in &event.visited {
             new_animation.push_back(AnimationFromPathfinding {
@@ -178,8 +180,18 @@ fn initiate_animation_by_pathfound_tile(
             });
         }
     }
+    for event in path_event_reader.read() {
+        for node in &event.nodes {
+            new_animation.push_back(AnimationFromPathfinding {
+                event: node.clone(),
+                color,
+            })
+        }
+    }
 
-    animation_gate.event_queues.push(new_animation);
+    if new_animation.len() != 0 {
+        animation_gate.event_queues.push(new_animation);
+    }
     animation_gate.timer.tick(time.delta());
 
     if animation_gate.timer.finished() {
@@ -187,15 +199,10 @@ fn initiate_animation_by_pathfound_tile(
         for event_queue in &mut animation_gate.event_queues {
             for _ in 0..PATHFINDING_TILE_BATCH {
                 if let Some(event) = event_queue.pop_front() {
-                    let last_event: u32 = match event.event.event_type {
-                        PathfindingEventType::Visited => 0,
-                        PathfindingEventType::Checked => 1,
-                    };
                     for (tile, mut anim) in &mut anim_states {
                         if tile.id == event.event.tile_id {
                             anim.update_color = true;
                             anim.color = event.color;
-                            anim.last_event = last_event;
                             if anim.state == TileAnimationState::Ran {
                                 anim.state = TileAnimationState::Initiated;
                             }

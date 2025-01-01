@@ -1,3 +1,5 @@
+use std::usize;
+
 use crate::{
     entities::{
         player::input::InputAction,
@@ -49,7 +51,7 @@ pub fn wilsons(mut grid: Vec<Vec<Node>>, terrain_events: &mut Vec<TerrainEvent>)
     while let Some((row, col)) = pick_random_unvisited(&grid, &mut rng) {
         println!("random unvisited: {}, {}", row, col);
         println!("random seed: {}, {}", seed_row, seed_col);
-        let path = random_walk(row, col, &mut grid, &mut rng);
+        let path = random_walk(row, col, &mut grid, &mut rng, terrain_events);
 
         for &(r, c) in &path {
             grid[r][c].state = NodeState::Path;
@@ -81,54 +83,107 @@ fn random_walk(
     start_col: usize,
     grid: &mut Vec<Vec<Node>>,
     rng: &mut ThreadRng,
+    terrain_events: &mut Vec<TerrainEvent>,
 ) -> Vec<(usize, usize)> {
     let directions = [(0, 2), (2, 0), (0, -2), (-2, 0)];
     let in_bounds = |row: isize, col: isize| -> bool {
         row >= 0 && row < ROW_COUNT as isize && col >= 0 && col < COL_COUNT as isize
     };
 
-    if grid[start_row][start_col].state != NodeState::Unvisited {
-        return vec![];
-    }
-
     let mut current_row = start_row;
     let mut current_col = start_col;
     let mut path: Vec<(usize, usize)> = vec![(start_row, start_col)];
+    grid[current_row][current_col].state = NodeState::Current;
+    terrain_events.push(TerrainEvent {
+        tile_id: grid[current_row][current_col].tile_id,
+        action: TerrainAction::Removed,
+        build_type: BuildType::Wall,
+    });
+
+    let mut last_direction: (isize, isize) = (0, 0);
     loop {
         let &(dr, dc) = directions.choose(rng).unwrap();
+        if (dr, dc) == last_direction {
+            continue;
+        }
+
         let new_row = current_row as isize + dr;
         let new_col = current_col as isize + dc;
-
         if in_bounds(new_row, new_col) {
+            last_direction = (-dr, -dc);
             let u_new_row = new_row as usize;
             let u_new_col = new_col as usize;
-            if grid[u_new_row][u_new_col].state == NodeState::Current {
-                for (row, col) in path {
-                    grid[row][col].state = NodeState::Unvisited;
-                }
-                path = vec![(u_new_row, u_new_col)]; // I know this is wrong, just want to see what
-                grid[u_new_row][u_new_col].state = NodeState::Current; // happens
-            }
-
-            if grid[u_new_row][u_new_col].state == NodeState::Path {
+            if grid[u_new_row][u_new_col].state == NodeState::Unvisited {
+                // flip the one behind you
                 let intermediate_node =
                     &mut grid[(new_row - dr / 2) as usize][(new_col - dc / 2) as usize];
                 intermediate_node.state = NodeState::Current;
                 path.push((intermediate_node.row, intermediate_node.col));
+                terrain_events.push(TerrainEvent {
+                    tile_id: intermediate_node.tile_id,
+                    action: TerrainAction::Removed,
+                    build_type: BuildType::Wall,
+                });
+
+                grid[u_new_row][u_new_col].state = NodeState::Current;
+                terrain_events.push(TerrainEvent {
+                    tile_id: grid[u_new_row][u_new_col].tile_id,
+                    action: TerrainAction::Removed,
+                    build_type: BuildType::Wall,
+                });
+                path.push((u_new_row, u_new_col));
+                current_row = u_new_row;
+                current_col = u_new_col;
+            } else if grid[u_new_row][u_new_col].state == NodeState::Current {
+                let intermediate_node =
+                    &mut grid[(new_row - dr / 2) as usize][(new_col - dc / 2) as usize];
+                intermediate_node.state = NodeState::Current;
+                path.push((intermediate_node.row, intermediate_node.col));
+                terrain_events.push(TerrainEvent {
+                    tile_id: intermediate_node.tile_id,
+                    action: TerrainAction::Removed,
+                    build_type: BuildType::Wall,
+                });
+                let mut split_vec_idx: Option<usize> = None;
+                for (index, (row, col)) in path.iter_mut().enumerate() {
+                    if u_new_row == *row && u_new_col == *col {
+                        split_vec_idx = Some(index);
+                    }
+                    if split_vec_idx.map(|idx| index == idx).unwrap_or(true) {
+                        continue;
+                    }
+                    grid[*row][*col].state = NodeState::Unvisited;
+                    terrain_events.push(TerrainEvent {
+                        tile_id: grid[*row][*col].tile_id,
+                        action: TerrainAction::Added,
+                        build_type: BuildType::Wall,
+                    });
+                }
+                println!(
+                    "row/col {u_new_row} {u_new_col}, {split_vec_idx:?}, {}",
+                    path.len()
+                );
+                println!("{:?}", grid[u_new_row][u_new_col]);
+                println!("{:?}", path);
+                path.truncate(split_vec_idx.unwrap() + 1); // Skip intermediate for 2 block jumps
+                current_row = path[split_vec_idx.unwrap_or(0)].0;
+                current_col = path[split_vec_idx.unwrap_or(0)].1;
+                last_direction = (
+                    new_row - current_row as isize,
+                    new_col - current_col as isize,
+                );
+            } else if grid[u_new_row][u_new_col].state == NodeState::Path {
+                let intermediate_node =
+                    &mut grid[(new_row - dr / 2) as usize][(new_col - dc / 2) as usize];
+                intermediate_node.state = NodeState::Current;
+                path.push((intermediate_node.row, intermediate_node.col));
+                terrain_events.push(TerrainEvent {
+                    tile_id: intermediate_node.tile_id,
+                    action: TerrainAction::Removed,
+                    build_type: BuildType::Wall,
+                });
                 return path;
             }
-
-            let current_node = &mut grid[current_row][current_col];
-            current_node.state = NodeState::Current;
-            path.push((current_row, current_col));
-
-            let intermediate_node =
-                &mut grid[(new_row - dr / 2) as usize][(new_col - dc / 2) as usize];
-            intermediate_node.state = NodeState::Current;
-            path.push((intermediate_node.row, intermediate_node.col));
-
-            current_row = new_row as usize;
-            current_col = new_col as usize;
         }
     }
 }

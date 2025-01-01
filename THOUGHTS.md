@@ -360,3 +360,7 @@ Could pop off the vec, or just reverse and iterate?
 Anyway, still working on wall generation.
 
 Got something close to right very clumsily. I'll need to spend a bit debugging it, but I'm animating it now, so that should help debugging.
+
+So much is a mess, I just kept going, some planning would've helped. I'm sure I could do better next time. Chalk it up to Rust noobiness?
+
+Think I got Wilson's working, need to validate it more, but it seems to be a completely connected maze at least.

@@ -6,7 +6,7 @@ use crate::{
     animation::tile::{TileAnimation, TileAnimationState},
     collision::collidable::Collidable,
     entities::ground::{GROUND_L_BORDER, GROUND_T_BORDER},
-    terrain::tile_modifier::{BuildType, TerrainAction, TerrainEvent},
+    terrain::tile_modifier::{BuildType, TerrainAction, TerrainEvent, TerrainGenerationEvent},
 };
 
 use super::ground::{GROUND_H, GROUND_W};
@@ -90,7 +90,7 @@ fn spawn_tile_grid(
                 visibility = Visibility::Visible;
                 tile_type = TileType::End;
 
-                anim_enabled = TileAnimationState::Disabled;
+                anim_enabled = TileAnimationState::Ran;
                 tile_color = END_TILE_COLOR;
             }
 
@@ -120,44 +120,48 @@ fn spawn_tile_grid(
 
 fn handle_terrain_event(
     mut commands: Commands,
-    mut terrain_reader: EventReader<TerrainEvent>,
+    mut terrain_gen_reader: EventReader<TerrainGenerationEvent>,
     mut end_updated_writer: EventWriter<EndUpdatedEvent>,
     mut q_tiles: Query<(Entity, &mut Tile)>,
 ) {
-    for event in terrain_reader.read() {
-        for (entity_id, mut tile) in &mut q_tiles {
-            let is_current_tile = event.tile_id == tile.id;
-            if event.action == TerrainAction::Added {
-                if is_current_tile {
-                    if event.build_type == BuildType::Wall {
-                        tile.tile_type = TileType::Wall;
-                        commands.entity(entity_id).insert(Collidable);
-                    }
-                    if event.build_type == BuildType::End {
-                        tile.tile_type = TileType::End;
-                        commands.entity(entity_id).remove::<Collidable>();
-                        end_updated_writer.send(EndUpdatedEvent {
-                            new_end_id: Some(tile.id),
-                            old_end_id: None,
-                        });
-                    }
-                } else if event.build_type == BuildType::End && tile.tile_type == TileType::End {
-                    tile.tile_type = TileType::Open;
-                    end_updated_writer.send(EndUpdatedEvent {
-                        new_end_id: None,
-                        old_end_id: Some(tile.id),
-                    });
-                }
-            } else if event.action == TerrainAction::Removed {
-                if is_current_tile {
-                    if tile.tile_type != TileType::End {
+    for events in terrain_gen_reader.read() {
+        for event in events.terrain_events.clone() {
+            for (entity_id, mut tile) in &mut q_tiles {
+                let is_current_tile = event.tile_id == tile.id;
+                if event.action == TerrainAction::Added {
+                    if is_current_tile {
+                        if event.build_type == BuildType::Wall {
+                            tile.tile_type = TileType::Wall;
+                            commands.entity(entity_id).insert(Collidable);
+                        }
+                        if event.build_type == BuildType::End {
+                            tile.tile_type = TileType::End;
+                            commands.entity(entity_id).remove::<Collidable>();
+                            end_updated_writer.send(EndUpdatedEvent {
+                                new_end_id: Some(tile.id),
+                                old_end_id: None,
+                            });
+                        }
+                    } else if event.build_type == BuildType::End && tile.tile_type == TileType::End
+                    {
                         tile.tile_type = TileType::Open;
-                        commands.entity(entity_id).remove::<Collidable>();
-                    } else {
                         end_updated_writer.send(EndUpdatedEvent {
                             new_end_id: None,
                             old_end_id: Some(tile.id),
                         });
+                    }
+                } else if event.action == TerrainAction::Removed {
+                    if is_current_tile {
+                        if tile.tile_type != TileType::End {
+                            tile.tile_type = TileType::Open;
+                            commands.entity(entity_id).remove::<Collidable>();
+                        } else {
+                            tile.tile_type = TileType::Open;
+                            end_updated_writer.send(EndUpdatedEvent {
+                                new_end_id: None,
+                                old_end_id: Some(tile.id),
+                            });
+                        }
                     }
                 }
             }

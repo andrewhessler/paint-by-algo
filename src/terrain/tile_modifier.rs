@@ -5,11 +5,18 @@ use crate::entities::{
     tile::{emit_current::CurrentMouseTileEvent, Tile, TileType, COL_COUNT, ROW_COUNT},
 };
 
-#[derive(Event)]
+use super::algorithms::wilsons::setup_and_run_wilsons;
+
+#[derive(Clone)]
 pub struct TerrainEvent {
     pub tile_id: usize,
     pub build_type: BuildType,
     pub action: TerrainAction,
+}
+
+#[derive(Event, Clone)]
+pub struct TerrainGenerationEvent {
+    pub terrain_events: Vec<TerrainEvent>,
 }
 
 #[derive(PartialEq, Clone)]
@@ -28,11 +35,13 @@ pub struct TileModifierPlugin;
 
 impl Plugin for TileModifierPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<TerrainEvent>()
+        app.add_event::<TerrainGenerationEvent>()
             .insert_resource(BuildType::Wall)
             .add_systems(
                 FixedUpdate,
                 (
+                    build_maze_with_wilsons,
+                    fill_with_walls,
                     manage_wall_placement,
                     manage_build_type,
                     build_walls_to_block_world_wrap,
@@ -61,31 +70,74 @@ fn manage_build_type(
 fn build_walls_to_block_world_wrap(
     q_tiles: Query<&Tile>,
     mut player_input_reader: EventReader<PlayerInput>,
-    mut wall_event_writer: EventWriter<TerrainEvent>,
-    mut wall_active: Local<bool>,
+    mut terrain_gen_writer: EventWriter<TerrainGenerationEvent>,
+    mut wrapping_wall_active: Local<bool>,
 ) {
     for input in player_input_reader.read() {
         if input.action == InputAction::Pressed && input.key == KeyCode::KeyZ {
-            let action = if *wall_active {
-                *wall_active = false;
+            let action = if *wrapping_wall_active {
+                *wrapping_wall_active = false;
                 TerrainAction::Removed
             } else {
-                *wall_active = true;
+                *wrapping_wall_active = true;
                 TerrainAction::Added
             };
+            let mut walls = vec![];
             for tile in &q_tiles {
                 if tile.row >= ROW_COUNT - 2
                     || tile.row < 2
                     || tile.col >= COL_COUNT - 2
                     || tile.col < 2
                 {
-                    wall_event_writer.send(TerrainEvent {
+                    walls.push(TerrainEvent {
                         tile_id: tile.id,
                         build_type: BuildType::Wall,
                         action: action.clone(),
                     });
+                    terrain_gen_writer.send(TerrainGenerationEvent {
+                        terrain_events: walls.clone(),
+                    });
                 }
             }
+        }
+    }
+}
+
+fn fill_with_walls(
+    q_tiles: Query<&Tile>,
+    mut player_input_reader: EventReader<PlayerInput>,
+    mut terrain_gen_writer: EventWriter<TerrainGenerationEvent>,
+) {
+    for input in player_input_reader.read() {
+        if input.action == InputAction::Pressed && input.key == KeyCode::KeyF {
+            let tiles: Vec<&Tile> = q_tiles.iter().collect();
+            let mut walls = vec![];
+            for tile in tiles {
+                walls.push(TerrainEvent {
+                    tile_id: tile.id,
+                    action: TerrainAction::Added,
+                    build_type: BuildType::Wall,
+                });
+            }
+            terrain_gen_writer.send(TerrainGenerationEvent {
+                terrain_events: walls.clone(),
+            });
+        }
+    }
+}
+
+fn build_maze_with_wilsons(
+    q_tiles: Query<&Tile>,
+    mut player_input_reader: EventReader<PlayerInput>,
+    mut maze_gen_writer: EventWriter<TerrainGenerationEvent>,
+) {
+    for input in player_input_reader.read() {
+        if input.action == InputAction::Pressed && input.key == KeyCode::KeyN {
+            let tiles: Vec<&Tile> = q_tiles.iter().collect();
+            let events = setup_and_run_wilsons(&tiles);
+            maze_gen_writer.send(TerrainGenerationEvent {
+                terrain_events: events,
+            });
         }
     }
 }
@@ -95,7 +147,7 @@ fn manage_wall_placement(
     build_state: Res<BuildType>,
     mut current_mouse_tile_reader: EventReader<CurrentMouseTileEvent>,
     mut player_mouse_input_reader: EventReader<PlayerMouseInput>,
-    mut wall_event_writer: EventWriter<TerrainEvent>,
+    mut terrain_gen_writer: EventWriter<TerrainGenerationEvent>,
     mut current_tile_id: Local<Option<usize>>,
     mut left_pressed: Local<bool>,
     mut right_pressed: Local<bool>,
@@ -123,10 +175,12 @@ fn manage_wall_placement(
         if *left_pressed {
             for tile in &q_tiles {
                 if tile.id == current_tile && tile.tile_type != TileType::Wall {
-                    wall_event_writer.send(TerrainEvent {
-                        tile_id: tile.id,
-                        build_type: *build_state,
-                        action: TerrainAction::Added,
+                    terrain_gen_writer.send(TerrainGenerationEvent {
+                        terrain_events: vec![TerrainEvent {
+                            tile_id: tile.id,
+                            build_type: *build_state,
+                            action: TerrainAction::Added,
+                        }],
                     });
                 }
             }
@@ -135,10 +189,12 @@ fn manage_wall_placement(
         if *right_pressed {
             for tile in &q_tiles {
                 if tile.id == current_tile {
-                    wall_event_writer.send(TerrainEvent {
-                        tile_id: tile.id,
-                        build_type: *build_state,
-                        action: TerrainAction::Removed,
+                    terrain_gen_writer.send(TerrainGenerationEvent {
+                        terrain_events: vec![TerrainEvent {
+                            tile_id: tile.id,
+                            build_type: *build_state,
+                            action: TerrainAction::Removed,
+                        }],
                     });
                 }
             }

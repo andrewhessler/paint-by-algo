@@ -5,7 +5,7 @@ use crate::{
         player::input::{InputAction, PlayerInput},
         tile::{emit_current::CurrentTileEvent, Tile},
     },
-    terrain::tile_modifier::TerrainEvent,
+    terrain::tile_modifier::{TerrainEvent, TerrainGenerationEvent},
 };
 
 use super::algorithms::{astar::setup_and_run_astar, dijkstra::setup_and_run_dijkstra, Algorithm};
@@ -68,7 +68,7 @@ fn run_algo(
 fn trigger_pathfinding_by_button(
     tiles: Query<&Tile>,
     mut player_input_reader: EventReader<PlayerInput>,
-    mut terrain_event_reader: EventReader<TerrainEvent>,
+    mut terrain_gen_reader: EventReader<TerrainGenerationEvent>,
     mut current_tile_reader: EventReader<CurrentTileEvent>,
     mut pathfinding_writer: EventWriter<PathfindingEvent>,
     mut path_writer: EventWriter<PathEvent>,
@@ -77,7 +77,7 @@ fn trigger_pathfinding_by_button(
     mut pre_calced_path: Local<Vec<PathfindingNode>>,
     mut algo: ResMut<AlgorithmInUse>,
 ) {
-    for _event in terrain_event_reader.read() {
+    for _event in terrain_gen_reader.read() {
         let tiles: Vec<&Tile> = tiles.iter().collect();
         let (visited, path) = run_algo(&*algo, &tiles, &*current_tile_id);
         *pre_calced_event_list = visited;
@@ -113,9 +113,9 @@ fn trigger_pathfinding_by_button(
 
         if input.action == InputAction::Pressed && input.key == KeyCode::KeyH {
             println!("Emitting {} Path Events", pre_calced_path.len());
-            path_writer.send(PathEvent {
-                nodes: (*pre_calced_path).clone(),
-            });
+            let mut nodes = (*pre_calced_path).clone();
+            nodes.reverse();
+            path_writer.send(PathEvent { nodes });
         }
     }
 }

@@ -32,6 +32,7 @@ mod pathfinding {
     pub mod emit_pathfinding;
 }
 mod terrain {
+    pub mod algorithms;
     pub mod tile_modifier;
 }
 

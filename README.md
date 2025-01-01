@@ -31,6 +31,8 @@ Right-Click - Remove
 Default Builds 
 ```
 Z - Build Walls around edge of world wrap
+F - To fill the screen with Walls
+N - For maze generation in whatever state it's in
 ```
 
 ## Roadmap

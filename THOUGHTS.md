@@ -86,7 +86,7 @@ Or maybe both can write a `MovementEvent`. Interesting how that event would prob
 Probably because there's only ever really one consumer, but I can see `TileActivated` having more than 1 consumer.
 And if not, then we could probably have more concretely made it some sort of `RequestTileAnimationEvent` that lives in `TileAnimation`.
 
-Should I be considering single-writer principle in this scenario, or intentionally breaking it? I already intentionally break it in real life...
+Should I be considering single-writer principle in this scenario, or intentionally breaking it? I already intentionally arguably break it in real life...
 If I were to follow single-writer, I'd need to make `TileAnimation` listen on multiple topics, but manage the same state. Best they're ordered and funneled into a single event, right?
 
 If they performed completely different animations that wouldn't be a big deal I suppose 
@@ -161,7 +161,7 @@ Seems like if components are associated with an Asset, they old the handle to th
 
 
 ### Quicker Algorithm
-Rignt now I batch tile animations. I'm thinking about grabbing every checked leading up to a visited and batching that way instead of by count. 
+Right now I batch tile animations. I'm thinking about grabbing every checked leading up to a visited and batching that way instead of by count. 
 But I also wouldn't mind just a less noisy trail. Maybe see if there's something I did wrong with my algorithm
 
 I'm trying just emitting Visited... not sure what others did, still gotta go look at that repo.
@@ -170,7 +170,7 @@ Okay, doing only `Visited` with exactly the color effect I want. The structure o
 Also some day probably a config option for blipping `Checked`.
 
 ### I wanna add walls
-I really want people to be able to place Walls, but I think it will make developing that feature much more exciting if Walls already work.
+I really want to be able to place Walls, but I think it will make developing that feature much more exciting if Walls already work.
 Oh, but first I should fix animation/everything structure.
 
 Starting with separating PlayerInput and PlayerMovement.
@@ -216,7 +216,7 @@ Next, make the end tile end game. Hmmm, this seems hard. Oh god, I might not do 
 Though, I might be upset about not handling it for everything right now? Oh well, shouldn't be too hard since it'll still be pretty isolated to the entities.
 
 ### Pathfinding World Wrap
-Next, I want to see if I can make my pathfinding world wrap... I think I can do that if I just duplicate the grid on all 4 sides? Or do I have to do it on 9 sides?
+Next, I want to see if I can make my pathfinding world wrap... I think I can do that if I just duplicate the grid on all 4 sides? Or do I have to do it on 8 sides?
 
 I should maybe start doing some profiling before I implement this.
 
@@ -340,4 +340,23 @@ Alright, time for a break from continually working on this. I have all the featu
 Off to something non-Bevy, websockets?
 
 
+### I'm back already
+Want to add maze generation and maybe a couple more algorithms, dfs, bfs.
 
+
+Gonna try Wilson's algorithm for a bit and I guess this naturally lands in `terrain/` algorithms?
+
+Okay, I'm a little stumped that my walls live on tiles and all the maze talk just puts up walls between tiles.
+I think I'll start by trying every set of 9 tiles has one open tile in the middle and the rest are potentially open or walls depending on the next path node.
+
+Or could I do the path generation on a scaled down grid, and then blow it up and put walls down everywhere and open everything in the path? Is that kind of the same thing?
+
+Okay, gonna try to generate the path on a scaled down set of walls and just open up between the nodes.
+Will probably need a different scale. Do I do 4 or 8 directions? Start with 4.
+
+I can't believe it took until now for me to see that the path highlight happens in reverse. I thought the way I was pushing onto the Vec solved that. I really thought I already checked...
+Could pop off the vec, or just reverse and iterate?
+
+Anyway, still working on wall generation.
+
+Got something close to right very clumsily. I'll need to spend a bit debugging it, but I'm animating it now, so that should help debugging.

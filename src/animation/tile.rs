@@ -8,12 +8,13 @@ use bevy::prelude::*;
 
 use crate::{
     entities::tile::{
-        emit_current::CurrentTileEvent, EndUpdatedEvent, Tile, TileType, END_TILE_COLOR, WALL_COLOR,
+        emit_current::CurrentTileEvent, EndUpdatedEvent, Tile, TileType, COL_COUNT, END_TILE_COLOR,
+        ROW_COUNT, WALL_COLOR,
     },
     pathfinding::emit_pathfinding::{
         PathEvent, PathfindingEvent, PathfindingEventType, PathfindingNode,
     },
-    terrain::tile_modifier::{BuildType, TerrainAction, TerrainEvent},
+    terrain::tile_modifier::{BuildType, TerrainAction, TerrainEvent, TerrainGenerationEvent},
 };
 
 const TILE_ANIMATION_MAX_SCALE: f32 = 1.3;
@@ -28,6 +29,7 @@ pub struct TileAnimation {
     pub state: TileAnimationState,
     pub update_color: bool,
     pub color: usize,
+    pub super_color: Option<Color>,
 }
 
 #[derive(PartialEq)]
@@ -48,7 +50,7 @@ impl Default for TileAnimationState {
 
 impl Plugin for TileAnimationPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup_pathfinding_animation_timer)
+        app.add_systems(Startup, setup_animation_timers)
             .add_systems(
                 FixedUpdate,
                 (
@@ -80,7 +82,7 @@ fn animate_tile(
             if let Some(material) = materials.get_mut(&mesh.0) {
                 if anim.update_color {
                     let color = anim.color as f32;
-                    material.color = Color::hsl(color, 0.30, 0.73);
+                    material.color = anim.super_color.unwrap_or(Color::hsl(color, 0.30, 0.73));
                 }
             }
             if *vis == Visibility::Hidden {
@@ -116,23 +118,6 @@ fn animate_tile(
     }
 }
 
-fn initiate_wall_bump_tile_animation(
-    mut anim_states: Query<(&Tile, &mut TileAnimation)>,
-    mut tile_activated_reader: EventReader<CurrentTileEvent>,
-) {
-    for event in tile_activated_reader.read() {
-        for (tile, mut anim) in &mut anim_states {
-            if tile.tile_type == TileType::Wall {
-                if tile.id == event.id {
-                    if anim.state == TileAnimationState::Ran {
-                        anim.state = TileAnimationState::Initiated;
-                    }
-                }
-            }
-        }
-    }
-}
-
 #[derive(Resource)]
 struct PathfindingAnimationGate {
     pub timer: Timer,
@@ -144,7 +129,7 @@ pub struct AnimationFromPathfinding {
     pub color: usize,
 }
 
-fn setup_pathfinding_animation_timer(mut commands: Commands) {
+fn setup_animation_timers(mut commands: Commands) {
     commands.insert_resource(PathfindingAnimationGate {
         timer: Timer::new(
             Duration::from_millis(PATHFINDING_ANIMATION_DELAY_MS),
@@ -152,15 +137,18 @@ fn setup_pathfinding_animation_timer(mut commands: Commands) {
         ),
         event_queues: Vec::new(),
     });
+    commands.insert_resource(TerrainAnimationGate {
+        timer: Timer::new(
+            Duration::from_millis(PATHFINDING_ANIMATION_DELAY_MS),
+            TimerMode::Repeating,
+        ),
+        event_queues: vec![],
+    });
 }
 
 static COUNTER: AtomicUsize = AtomicUsize::new(1);
 fn get_calc_number() -> usize {
     COUNTER.fetch_add(1, Ordering::SeqCst)
-}
-
-fn read_calc_number() -> usize {
-    COUNTER.load(Ordering::SeqCst)
 }
 
 fn initiate_animation_by_pathfound_tile(
@@ -214,9 +202,25 @@ fn initiate_animation_by_pathfound_tile(
     }
 }
 
+#[derive(Resource)]
+struct TerrainAnimationGate {
+    pub timer: Timer,
+    pub event_queues: Vec<EventQueueWithTimesFired>,
+}
+
+struct EventQueueWithTimesFired {
+    pub event_queue: VecDeque<AnimationFromTerrain>,
+    pub times_fired: usize,
+}
+
+pub struct AnimationFromTerrain {
+    pub event: TerrainEvent,
+    pub is_wall: bool,
+}
+
 fn handle_terrain_event(
     mut materials: ResMut<Assets<ColorMaterial>>,
-    mut terrain_reader: EventReader<TerrainEvent>,
+    mut terrain_gen_reader: EventReader<TerrainGenerationEvent>,
     mut end_reader: EventReader<EndUpdatedEvent>,
     mut q_tiles: Query<(
         &Tile,
@@ -224,7 +228,10 @@ fn handle_terrain_event(
         &MeshMaterial2d<ColorMaterial>,
         &mut Visibility,
     )>,
+    time: Res<Time>,
+    mut animation_gate: ResMut<TerrainAnimationGate>,
 ) {
+    let mut new_animation = VecDeque::default();
     for event in end_reader.read() {
         if let Some(curr_end) = event.new_end_id {
             for (tile, mut anim, mesh, mut vis) in &mut q_tiles {
@@ -238,30 +245,68 @@ fn handle_terrain_event(
             }
         }
         if let Some(old_end) = event.old_end_id {
-            for (tile, mut anim, _mesh, mut vis) in &mut q_tiles {
+            for (tile, _anim, _mesh, mut vis) in &mut q_tiles {
                 if tile.id == old_end {
-                    anim.state = TileAnimationState::Ran;
                     *vis = Visibility::Hidden;
                 }
             }
         }
     }
 
-    for event in terrain_reader.read() {
-        for (tile, mut anim, mesh, mut vis) in &mut q_tiles {
-            if event.action == TerrainAction::Added && event.build_type != BuildType::End {
-                if event.tile_id == tile.id {
-                    anim.state = TileAnimationState::Ran;
-                    *vis = Visibility::Visible;
-                    if let Some(material) = materials.get_mut(&mesh.0) {
-                        material.color = WALL_COLOR;
+    for events in terrain_gen_reader.read() {
+        for event in events.terrain_events.clone() {
+            for (tile, _anim, _mesh, _vis) in &mut q_tiles {
+                if event.action == TerrainAction::Added {
+                    if event.tile_id == tile.id {
+                        new_animation.push_front(AnimationFromTerrain {
+                            event: event.clone(),
+                            is_wall: true,
+                        });
+                    }
+                }
+                if event.action == TerrainAction::Removed {
+                    if event.tile_id == tile.id {
+                        new_animation.push_front(AnimationFromTerrain {
+                            event: event.clone(),
+                            is_wall: false,
+                        })
                     }
                 }
             }
-            if event.action == TerrainAction::Removed {
-                if event.tile_id == tile.id {
-                    anim.state = TileAnimationState::Ran;
-                    *vis = Visibility::Hidden;
+        }
+    }
+
+    if new_animation.len() != 0 {
+        animation_gate.event_queues.push(EventQueueWithTimesFired {
+            event_queue: new_animation,
+            times_fired: 0,
+        });
+    }
+    animation_gate.timer.tick(time.delta());
+
+    if animation_gate.timer.finished() {
+        for event_queue in &mut animation_gate.event_queues {
+            let range = if event_queue.times_fired < 1 {
+                event_queue.times_fired += 1;
+                ROW_COUNT * COL_COUNT
+            } else {
+                1
+            };
+            for _ in 0..range {
+                if let Some(event) = event_queue.event_queue.pop_back() {
+                    for (tile, mut anim, _mesh, _vis) in &mut q_tiles {
+                        if tile.id == event.event.tile_id {
+                            anim.update_color = true;
+                            if event.is_wall {
+                                anim.super_color = Some(WALL_COLOR);
+                            } else {
+                                anim.super_color = None;
+                            }
+                            if anim.state == TileAnimationState::Ran {
+                                anim.state = TileAnimationState::Initiated;
+                            }
+                        }
+                    }
                 }
             }
         }

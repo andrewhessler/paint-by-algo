@@ -3,7 +3,7 @@ use rand::thread_rng;
 
 use crate::{
     entities::tile::{Tile, TileType, COL_COUNT, ROW_COUNT},
-    pathfinding::emit_pathfinding::PathfindingNode,
+    pathfinding::emit_pathfinding::{AlgorithmInUse, PathfindingNode},
 };
 
 use super::node::Node;
@@ -25,7 +25,7 @@ use super::node::Node;
 pub fn setup_and_run_dfs(
     grid: &[&Tile],
     current_tile_id: usize,
-    direction_offset: usize,
+    algo: &AlgorithmInUse,
 ) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     println!("Triggered DFS");
     let mut end_tile_pos: Option<(usize, usize)> = None;
@@ -59,7 +59,7 @@ pub fn setup_and_run_dfs(
         end_tile_pos,
         &mut visited,
         &mut path,
-        direction_offset,
+        algo.direction_offset,
     );
 
     let visited = visited

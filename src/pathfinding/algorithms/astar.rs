@@ -2,7 +2,7 @@ use std::{collections::BinaryHeap, isize};
 
 use crate::{
     entities::tile::{Tile, TileType, COL_COUNT, ROW_COUNT},
-    pathfinding::emit_pathfinding::PathfindingNode,
+    pathfinding::emit_pathfinding::{AlgorithmInUse, PathfindingNode},
 };
 
 use super::node::Node;
@@ -11,7 +11,7 @@ pub fn setup_and_run_astar(
     grid: &[&Tile],
     current_tile_id: usize,
     is_aggressive: bool,
-    directional_offset: usize,
+    algo: &AlgorithmInUse,
 ) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     let mut end_tile_pos: Option<(usize, usize)> = None;
     let mut current_tile_pos: (usize, usize) = (0, 0);
@@ -43,7 +43,7 @@ pub fn setup_and_run_astar(
         current_tile_pos,
         end_tile_pos,
         is_aggressive,
-        directional_offset,
+        algo.direction_offset,
     );
 }
 

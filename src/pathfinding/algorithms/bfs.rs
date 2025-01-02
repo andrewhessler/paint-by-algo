@@ -4,7 +4,7 @@ use rand::{seq::SliceRandom, thread_rng};
 
 use crate::{
     entities::tile::{Tile, TileType, COL_COUNT, ROW_COUNT},
-    pathfinding::emit_pathfinding::PathfindingNode,
+    pathfinding::emit_pathfinding::{AlgorithmInUse, PathfindingNode},
 };
 
 use super::node::Node;
@@ -12,7 +12,7 @@ use super::node::Node;
 pub fn setup_and_run_bfs(
     grid: &[&Tile],
     current_tile_id: usize,
-    direction_offset: usize,
+    algo: &AlgorithmInUse,
 ) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     println!("Triggered BFS");
     let mut end_tile_pos: Option<(usize, usize)> = None;
@@ -44,7 +44,7 @@ pub fn setup_and_run_bfs(
         current_tile_pos,
         end_tile_pos,
         &mut visited,
-        direction_offset,
+        algo.direction_offset,
     );
 
     let visited = visited

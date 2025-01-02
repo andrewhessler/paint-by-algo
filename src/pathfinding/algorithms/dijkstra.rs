@@ -3,13 +3,13 @@ use std::collections::BinaryHeap;
 
 use crate::{
     entities::tile::{Tile, TileType, COL_COUNT, ROW_COUNT},
-    pathfinding::emit_pathfinding::PathfindingNode,
+    pathfinding::emit_pathfinding::{AlgorithmInUse, PathfindingNode},
 };
 
 pub fn setup_and_run_dijkstra(
     tiles: &[&Tile],
     current_tile_id: usize,
-    directional_offset: usize,
+    algo: &AlgorithmInUse,
 ) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     let mut end_tile_pos: Option<(usize, usize)> = None;
     let mut current_tile_pos: (usize, usize) = (0, 0);
@@ -36,7 +36,7 @@ pub fn setup_and_run_dijkstra(
         }
     }
 
-    return dijkstra(nodes, current_tile_pos, end_tile_pos, directional_offset);
+    return dijkstra(nodes, current_tile_pos, end_tile_pos, algo.direction_offset);
 }
 
 // Emits an individual Pathfinding event per visited node

@@ -44,8 +44,8 @@ pub struct PathfindingNode {
 
 #[derive(Resource)]
 pub struct AlgorithmInUse {
-    name: Algorithm,
-    direction_offset: usize,
+    pub name: Algorithm,
+    pub direction_offset: usize,
 }
 
 fn run_algo(
@@ -54,15 +54,11 @@ fn run_algo(
     current_tile_id: &usize,
 ) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     match algo.name {
-        Algorithm::AStar => {
-            setup_and_run_astar(&tiles, *current_tile_id, false, algo.direction_offset)
-        }
-        Algorithm::AgressiveStar => {
-            setup_and_run_astar(&tiles, *current_tile_id, true, algo.direction_offset)
-        }
-        Algorithm::BFS => setup_and_run_bfs(&tiles, *current_tile_id, algo.direction_offset),
-        Algorithm::DFS => setup_and_run_dfs(&tiles, *current_tile_id, algo.direction_offset),
-        Algorithm::Dijkstra => setup_and_run_dijkstra(&tiles, *current_tile_id),
+        Algorithm::AStar => setup_and_run_astar(&tiles, *current_tile_id, false, algo),
+        Algorithm::AgressiveStar => setup_and_run_astar(&tiles, *current_tile_id, true, algo),
+        Algorithm::BFS => setup_and_run_bfs(&tiles, *current_tile_id, algo),
+        Algorithm::DFS => setup_and_run_dfs(&tiles, *current_tile_id, algo),
+        Algorithm::Dijkstra => setup_and_run_dijkstra(&tiles, *current_tile_id, algo),
     }
 }
 

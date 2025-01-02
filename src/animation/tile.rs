@@ -21,7 +21,7 @@ use crate::{
 const TILE_ANIMATION_MAX_SCALE: f32 = 1.3;
 const TILE_ANIMATION_STEP: f32 = 3.0;
 const PATHFINDING_ANIMATION_DELAY_MS: u64 = 1;
-const PATHFINDING_TILE_BATCH: u64 = 1;
+const PATHFINDING_TILE_BATCH: u64 = 5;
 
 pub struct TileAnimationPlugin;
 

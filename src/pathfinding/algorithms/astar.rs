@@ -1,4 +1,4 @@
-use std::{collections::BinaryHeap, isize};
+use std::{cmp::Reverse, collections::BinaryHeap, isize};
 
 use rand::{seq::SliceRandom, thread_rng};
 
@@ -7,7 +7,7 @@ use crate::{
     pathfinding::emit_pathfinding::{AlgorithmInUse, PathfindingNode},
 };
 
-use super::node::Node;
+use super::{node::Node, util::in_bounds};
 
 pub fn setup_and_run_astar(
     grid: &[&Tile],
@@ -20,6 +20,7 @@ pub fn setup_and_run_astar(
 
     // This looks weird, probably want it dynamic some day.
     let mut nodes: Vec<Vec<Node>> = vec![vec![Node::default(); COL_COUNT]; ROW_COUNT];
+    println!("Ran ASTAR");
 
     for tile in grid {
         let row = tile.row as usize;
@@ -53,10 +54,10 @@ fn astar(
     let mut heap = BinaryHeap::new();
     let mut visited_order = vec![];
     let mut path = vec![];
-    heap.push(Node {
+    heap.push(Reverse(Node {
         distance: 0,
         ..nodes[current_tile_pos.0][current_tile_pos.1]
-    });
+    }));
 
     let mut directions = [
         (-1, -1),
@@ -75,7 +76,7 @@ fn astar(
     }
     let end_pos = end_tile_pos.unwrap_or((0, 0));
 
-    while let Some(mut node) = heap.pop() {
+    while let Some(Reverse(mut node)) = heap.pop() {
         if node.visited == true || node.is_wall {
             continue;
         }
@@ -89,26 +90,37 @@ fn astar(
             tile_id: node.tile_id,
         });
 
-        for (row_offset, col_offset) in directions {
-            let visit_row = ((node.row + ROW_COUNT) as isize + row_offset) as usize % ROW_COUNT; // add row count to avoid negative index >.> <.<
-            let visit_col = ((node.col + COL_COUNT) as isize + col_offset) as usize % COL_COUNT;
+        for (dr, dc) in directions {
+            let visit_row;
+            let visit_col;
+            if algo.world_wrap_enabled {
+                visit_row = ((node.row + ROW_COUNT) as isize + dr) as usize % ROW_COUNT; // add row count to avoid negative index >.> <.<
+                visit_col = ((node.col + COL_COUNT) as isize + dc) as usize % COL_COUNT;
+            } else {
+                let i_visit_row = node.row as isize + dr;
+                let i_visit_col = node.col as isize + dc;
+                if in_bounds(i_visit_row, i_visit_col) {
+                    visit_row = i_visit_row as usize;
+                    visit_col = i_visit_col as usize;
+                } else {
+                    continue;
+                }
+            }
 
             if nodes[visit_row][visit_col].is_wall {
                 continue;
             }
 
-            let mut directional_distance = if row_offset.abs() + col_offset.abs() == 2 {
-                14
-            } else {
-                10
-            };
+            let mut directional_distance = if dr.abs() + dc.abs() == 2 { 14 } else { 10 };
 
             let mut dx = end_pos.1 as isize - visit_col as isize;
             let mut dy = end_pos.0 as isize - visit_row as isize;
-            if dx.abs() > COL_COUNT as isize / 2 {
+            if dx.abs() > COL_COUNT as isize / 2 && algo.world_wrap_enabled {
+                println!("Whatup");
                 dx = COL_COUNT as isize - dx.abs();
             }
-            if dy.abs() > ROW_COUNT as isize / 2 {
+            if dy.abs() > ROW_COUNT as isize / 2 && algo.world_wrap_enabled {
+                println!("Whatup");
                 dy = ROW_COUNT as isize - dy.abs();
             }
             let distance_between_checked_and_end = ((dx.pow(2) + dy.pow(2)) as f64).sqrt();
@@ -118,6 +130,9 @@ fn astar(
             } else {
                 distance_between_checked_and_end as usize
             };
+            if current_tile_pos == (visit_row, visit_col) {
+                println!("{}", directional_distance);
+            }
 
             let checked_node = &mut nodes[visit_row][visit_col];
             let new_distance = node.distance + directional_distance;
@@ -130,7 +145,7 @@ fn astar(
                 checked_node.distance = new_distance;
                 checked_node.previous_node = Some((node.row, node.col));
                 checked_node.visited = false;
-                heap.push(Node { ..*checked_node });
+                heap.push(Reverse(Node { ..*checked_node }));
             }
         }
     }

@@ -383,3 +383,10 @@ DFS is weird, took me a long time to accept it was searching correctly on the un
 Each direction is a depth and children can appear in multiple places in the virtual tree; infinitely with the world wrap if I didn't have base cases, right?
 
 Nah, I still doubt DFS, but maybe I'll show someone and they'll tell me if it's wrong lol
+
+### Random QoL Modifiers
+Rotate direction list for pathfinding, randomize direction list for pathfinding, and toggle world wrap for pathfinding.
+
+### A* definitely broken
+Awesome, so using max heap instead of min heap, and after switching to min heap, A* looks all wrong.
+My hunches were on track lol

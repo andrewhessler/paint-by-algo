@@ -26,6 +26,7 @@ H - to highlight path
 
 Q - Rotate direction bias (most noticeable with DFS in an open space)
 X - Toggle random direction bias (Default: off)
+P - Toggle world wrap for pathfinding (Default: on)
 ```
 
 Maze Algorithms 
@@ -33,6 +34,7 @@ Maze Algorithms
 1 - Wilsons Bounded (Default)
 2 - Wilsons
 3 - Also Wilsons
+
 N - to generate maze
 M - Toggle fast maze building
 ```

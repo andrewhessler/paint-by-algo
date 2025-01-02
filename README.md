@@ -1,8 +1,9 @@
-[Pathfinding Pulse](https://github.com/user-attachments/assets/29ab2501-3498-4e22-be20-83119ef82d66)
+[PaintByAlgo.webm](https://github.com/user-attachments/assets/d2396e50-fa47-4025-92a5-e6aa3face4ec)
 
 # Paint By Algorithm (aka Bevy Pathfinder)
 
 Algorithm playground
+
 
 ## How to run
 `cargo run`

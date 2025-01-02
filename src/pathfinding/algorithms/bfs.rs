@@ -39,13 +39,7 @@ pub fn setup_and_run_bfs(
         }
     }
 
-    let path = bfs(
-        nodes,
-        current_tile_pos,
-        end_tile_pos,
-        &mut visited,
-        algo.direction_offset,
-    );
+    let path = bfs(nodes, current_tile_pos, end_tile_pos, &mut visited, algo);
 
     let visited = visited
         .into_iter()
@@ -59,7 +53,7 @@ fn bfs(
     current_tile_pos: (usize, usize),
     end_tile_pos: Option<(usize, usize)>,
     visited: &mut Vec<usize>,
-    offset: usize,
+    algo: &AlgorithmInUse,
 ) -> Vec<PathfindingNode> {
     let mut queue: VecDeque<(usize, usize)> = VecDeque::default();
     let current_tile_node = &mut grid[current_tile_pos.0][current_tile_pos.1];
@@ -78,7 +72,11 @@ fn bfs(
         (0, -1),
         (-1, 0),
     ];
-    directions.rotate_left(offset);
+    directions.rotate_left(algo.direction_offset);
+    if algo.random_direction {
+        let mut rng = thread_rng(); // I wonder if this is expensive...
+        directions.shuffle(&mut rng);
+    }
 
     while let Some((row, col)) = queue.pop_back() {
         if grid[row][col].visited {

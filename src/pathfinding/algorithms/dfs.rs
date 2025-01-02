@@ -59,7 +59,7 @@ pub fn setup_and_run_dfs(
         end_tile_pos,
         &mut visited,
         &mut path,
-        algo.direction_offset,
+        algo,
     );
 
     let visited = visited
@@ -79,7 +79,7 @@ fn dfs(
     end_tile_pos: Option<(usize, usize)>,
     visited: &mut Vec<usize>,
     path: &mut Vec<usize>,
-    offset: usize,
+    algo: &AlgorithmInUse,
 ) -> bool {
     let current_tile_node = &mut grid[current_tile_pos.0][current_tile_pos.1];
     let current_row = current_tile_node.row;
@@ -114,10 +114,11 @@ fn dfs(
     ];
     let mut in_path = false;
 
-    // for fun, who's to say the children have order?
-    // let mut rng = thread_rng();
-    // directions.shuffle(&mut rng);
-    directions.rotate_left(offset);
+    directions.rotate_left(algo.direction_offset);
+    if algo.random_direction {
+        let mut rng = thread_rng(); // I wonder if this is expensive...
+        directions.shuffle(&mut rng);
+    }
 
     for (dr, dc) in directions {
         let visit_row = ((current_row + ROW_COUNT) as isize + dr) as usize % ROW_COUNT; // add row count to avoid negative index >.> <.<
@@ -128,7 +129,7 @@ fn dfs(
             end_tile_pos,
             visited,
             path,
-            offset,
+            algo,
         );
         if in_path {
             path.push(current_tile_id);

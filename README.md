@@ -20,10 +20,12 @@ Algorithms (Press Number to paint with)
 3 - AggressiveStar
 4 - DFS
 5 - BFS
+
 J - to pulse pathfinding
 H - to highlight path
 
 Q - Rotate direction bias (most noticeable with DFS in an open space)
+X - Toggle random direction bias (Default: off)
 ```
 
 Maze Algorithms 

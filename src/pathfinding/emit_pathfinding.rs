@@ -22,6 +22,8 @@ impl Plugin for EmitPathfindingPlugin {
             .insert_resource(AlgorithmInUse {
                 name: Algorithm::Dijkstra,
                 direction_offset: 0,
+                random_direction: false,
+                world_wrap_enabled: true,
             })
             .add_systems(FixedUpdate, trigger_pathfinding_by_button);
     }
@@ -46,6 +48,8 @@ pub struct PathfindingNode {
 pub struct AlgorithmInUse {
     pub name: Algorithm,
     pub direction_offset: usize,
+    pub random_direction: bool,
+    pub world_wrap_enabled: bool,
 }
 
 fn run_algo(
@@ -146,7 +150,16 @@ fn set_algorithm_from_key_input(event: &PlayerInput, algo: &mut ResMut<Algorithm
 
         if event.key == KeyCode::KeyQ {
             algo.direction_offset = algo.direction_offset % 8 + 1;
-            println!("{}", algo.direction_offset);
+            return true;
+        }
+
+        if event.key == KeyCode::KeyP {
+            algo.world_wrap_enabled = !algo.world_wrap_enabled;
+            return true;
+        }
+
+        if event.key == KeyCode::KeyX {
+            algo.random_direction = !algo.random_direction;
             return true;
         }
     }

@@ -1,3 +1,5 @@
+use rand::{seq::SliceRandom, thread_rng};
+
 use super::node::Node;
 use std::collections::BinaryHeap;
 
@@ -36,7 +38,7 @@ pub fn setup_and_run_dijkstra(
         }
     }
 
-    return dijkstra(nodes, current_tile_pos, end_tile_pos, algo.direction_offset);
+    return dijkstra(nodes, current_tile_pos, end_tile_pos, algo);
 }
 
 // Emits an individual Pathfinding event per visited node
@@ -44,7 +46,7 @@ fn dijkstra(
     mut nodes: Vec<Vec<Node>>,
     current_tile_pos: (usize, usize),
     end_tile_pos: Option<(usize, usize)>,
-    offset: usize,
+    algo: &AlgorithmInUse,
 ) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     let mut heap = BinaryHeap::new();
     let mut visited_order = vec![];
@@ -64,7 +66,11 @@ fn dijkstra(
         (0, -1),
         (-1, 0),
     ];
-    directions.rotate_left(offset);
+    directions.rotate_left(algo.direction_offset);
+    if algo.random_direction {
+        let mut rng = thread_rng(); // I wonder if this is expensive...
+        directions.shuffle(&mut rng);
+    }
 
     let end_pos = end_tile_pos.unwrap_or((0, 0));
     while let Some(mut node) = heap.pop() {

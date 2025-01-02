@@ -1,5 +1,7 @@
 use std::{collections::BinaryHeap, isize};
 
+use rand::{seq::SliceRandom, thread_rng};
+
 use crate::{
     entities::tile::{Tile, TileType, COL_COUNT, ROW_COUNT},
     pathfinding::emit_pathfinding::{AlgorithmInUse, PathfindingNode},
@@ -38,13 +40,7 @@ pub fn setup_and_run_astar(
         }
     }
 
-    return astar(
-        nodes,
-        current_tile_pos,
-        end_tile_pos,
-        is_aggressive,
-        algo.direction_offset,
-    );
+    return astar(nodes, current_tile_pos, end_tile_pos, is_aggressive, algo);
 }
 
 fn astar(
@@ -52,7 +48,7 @@ fn astar(
     current_tile_pos: (usize, usize),
     end_tile_pos: Option<(usize, usize)>,
     is_aggressive: bool,
-    offset: usize,
+    algo: &AlgorithmInUse,
 ) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     let mut heap = BinaryHeap::new();
     let mut visited_order = vec![];
@@ -72,7 +68,11 @@ fn astar(
         (0, -1),
         (-1, 0),
     ];
-    directions.rotate_left(offset);
+    directions.rotate_left(algo.direction_offset);
+    if algo.random_direction {
+        let mut rng = thread_rng(); // I wonder if this is expensive...
+        directions.shuffle(&mut rng);
+    }
     let end_pos = end_tile_pos.unwrap_or((0, 0));
 
     while let Some(mut node) = heap.pop() {

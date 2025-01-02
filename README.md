@@ -28,7 +28,7 @@ Maze Algorithms
 1 - Wilsons Bounded (Default)
 2 - Wilsons
 3 - Also Wilsons
-N - for maze generation in whatever state it's in
+N - to generate maze
 M - Toggle fast maze building
 ```
 

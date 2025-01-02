@@ -9,6 +9,7 @@ use crate::{
 pub fn setup_and_run_dijkstra(
     tiles: &[&Tile],
     current_tile_id: usize,
+    directional_offset: usize,
 ) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     let mut end_tile_pos: Option<(usize, usize)> = None;
     let mut current_tile_pos: (usize, usize) = (0, 0);
@@ -35,7 +36,7 @@ pub fn setup_and_run_dijkstra(
         }
     }
 
-    return dijkstra(nodes, current_tile_pos, end_tile_pos);
+    return dijkstra(nodes, current_tile_pos, end_tile_pos, directional_offset);
 }
 
 // Emits an individual Pathfinding event per visited node
@@ -43,6 +44,7 @@ fn dijkstra(
     mut nodes: Vec<Vec<Node>>,
     current_tile_pos: (usize, usize),
     end_tile_pos: Option<(usize, usize)>,
+    offset: usize,
 ) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     let mut heap = BinaryHeap::new();
     let mut visited_order = vec![];
@@ -52,7 +54,7 @@ fn dijkstra(
         ..nodes[current_tile_pos.0][current_tile_pos.1]
     });
 
-    let directions = [
+    let mut directions = [
         (-1, -1),
         (1, -1),
         (1, 1),
@@ -62,6 +64,7 @@ fn dijkstra(
         (0, -1),
         (-1, 0),
     ];
+    directions.rotate_left(offset);
 
     let end_pos = end_tile_pos.unwrap_or((0, 0));
     while let Some(mut node) = heap.pop() {

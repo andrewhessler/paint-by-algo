@@ -376,3 +376,10 @@ BFS and DFS done in different weird cool ways, going to add some variations late
 My life has been watching this worm build mazes, I'm adding a fast maze hotkey.
 
 Fast Maze done, works fine. :)
+
+
+### DFS
+DFS is weird, took me a long time to accept it was searching correctly on the unwrapped world. The really confusing part was it using a diaganol as its first depth.
+Each direction is a depth and children can appear in multiple places in the virtual tree; infinitely with the world wrap if I didn't have base cases, right?
+
+Nah, I still doubt DFS, but maybe I'll show someone and they'll tell me if it's wrong lol

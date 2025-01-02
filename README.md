@@ -21,6 +21,8 @@ Algorithms (Press Number to paint with)
 5 - BFS
 J - to pulse pathfinding
 H - to highlight path
+
+Q - Rotate direction bias (most noticeable with DFS in an open space)
 ```
 
 Maze Algorithms 

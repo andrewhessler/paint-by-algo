@@ -25,6 +25,7 @@ use super::node::Node;
 pub fn setup_and_run_dfs(
     grid: &[&Tile],
     current_tile_id: usize,
+    direction_offset: usize,
 ) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     println!("Triggered DFS");
     let mut end_tile_pos: Option<(usize, usize)> = None;
@@ -58,6 +59,7 @@ pub fn setup_and_run_dfs(
         end_tile_pos,
         &mut visited,
         &mut path,
+        direction_offset,
     );
 
     let visited = visited
@@ -77,6 +79,7 @@ fn dfs(
     end_tile_pos: Option<(usize, usize)>,
     visited: &mut Vec<usize>,
     path: &mut Vec<usize>,
+    offset: usize,
 ) -> bool {
     let current_tile_node = &mut grid[current_tile_pos.0][current_tile_pos.1];
     let current_row = current_tile_node.row;
@@ -112,13 +115,21 @@ fn dfs(
     let mut in_path = false;
 
     // for fun, who's to say the children have order?
-    let mut rng = thread_rng();
-    directions.shuffle(&mut rng);
+    // let mut rng = thread_rng();
+    // directions.shuffle(&mut rng);
+    directions.rotate_left(offset);
 
     for (dr, dc) in directions {
         let visit_row = ((current_row + ROW_COUNT) as isize + dr) as usize % ROW_COUNT; // add row count to avoid negative index >.> <.<
         let visit_col = ((current_col + COL_COUNT) as isize + dc) as usize % COL_COUNT;
-        in_path |= dfs(grid, (visit_row, visit_col), end_tile_pos, visited, path);
+        in_path |= dfs(
+            grid,
+            (visit_row, visit_col),
+            end_tile_pos,
+            visited,
+            path,
+            offset,
+        );
         if in_path {
             path.push(current_tile_id);
             break;

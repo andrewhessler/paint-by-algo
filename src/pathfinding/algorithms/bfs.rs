@@ -1,5 +1,7 @@
 use std::collections::VecDeque;
 
+use rand::{seq::SliceRandom, thread_rng};
+
 use crate::{
     entities::tile::{Tile, TileType, COL_COUNT, ROW_COUNT},
     pathfinding::emit_pathfinding::PathfindingNode,
@@ -10,6 +12,7 @@ use super::node::Node;
 pub fn setup_and_run_bfs(
     grid: &[&Tile],
     current_tile_id: usize,
+    direction_offset: usize,
 ) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     println!("Triggered BFS");
     let mut end_tile_pos: Option<(usize, usize)> = None;
@@ -36,7 +39,13 @@ pub fn setup_and_run_bfs(
         }
     }
 
-    let path = bfs(nodes, current_tile_pos, end_tile_pos, &mut visited);
+    let path = bfs(
+        nodes,
+        current_tile_pos,
+        end_tile_pos,
+        &mut visited,
+        direction_offset,
+    );
 
     let visited = visited
         .into_iter()
@@ -50,6 +59,7 @@ fn bfs(
     current_tile_pos: (usize, usize),
     end_tile_pos: Option<(usize, usize)>,
     visited: &mut Vec<usize>,
+    offset: usize,
 ) -> Vec<PathfindingNode> {
     let mut queue: VecDeque<(usize, usize)> = VecDeque::default();
     let current_tile_node = &mut grid[current_tile_pos.0][current_tile_pos.1];
@@ -58,7 +68,7 @@ fn bfs(
 
     queue.push_front((current_row, current_col));
 
-    let directions = [
+    let mut directions = [
         (-1, -1),
         (1, -1),
         (1, 1),
@@ -68,6 +78,7 @@ fn bfs(
         (0, -1),
         (-1, 0),
     ];
+    directions.rotate_left(offset);
 
     while let Some((row, col)) = queue.pop_back() {
         if grid[row][col].visited {
@@ -81,6 +92,8 @@ fn bfs(
                 break;
             }
         }
+        // let mut rng = thread_rng();
+        // directions.shuffle(&mut rng);
 
         for (dr, dc) in directions {
             let visit_row = ((row + ROW_COUNT) as isize + dr) as usize % ROW_COUNT; // add row count to avoid negative index >.> <.<

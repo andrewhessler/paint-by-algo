@@ -21,6 +21,7 @@ impl Plugin for EmitPathfindingPlugin {
             .add_event::<PathEvent>()
             .insert_resource(AlgorithmInUse {
                 name: Algorithm::Dijkstra,
+                direction_offset: 0,
             })
             .add_systems(FixedUpdate, trigger_pathfinding_by_button);
     }
@@ -44,6 +45,7 @@ pub struct PathfindingNode {
 #[derive(Resource)]
 pub struct AlgorithmInUse {
     name: Algorithm,
+    direction_offset: usize,
 }
 
 fn run_algo(
@@ -52,10 +54,14 @@ fn run_algo(
     current_tile_id: &usize,
 ) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     match algo.name {
-        Algorithm::AStar => setup_and_run_astar(&tiles, *current_tile_id, false),
-        Algorithm::AgressiveStar => setup_and_run_astar(&tiles, *current_tile_id, true),
-        Algorithm::BFS => setup_and_run_bfs(&tiles, *current_tile_id),
-        Algorithm::DFS => setup_and_run_dfs(&tiles, *current_tile_id),
+        Algorithm::AStar => {
+            setup_and_run_astar(&tiles, *current_tile_id, false, algo.direction_offset)
+        }
+        Algorithm::AgressiveStar => {
+            setup_and_run_astar(&tiles, *current_tile_id, true, algo.direction_offset)
+        }
+        Algorithm::BFS => setup_and_run_bfs(&tiles, *current_tile_id, algo.direction_offset),
+        Algorithm::DFS => setup_and_run_dfs(&tiles, *current_tile_id, algo.direction_offset),
         Algorithm::Dijkstra => setup_and_run_dijkstra(&tiles, *current_tile_id),
     }
 }
@@ -139,6 +145,12 @@ fn set_algorithm_from_key_input(event: &PlayerInput, algo: &mut ResMut<Algorithm
 
         if event.key == KeyCode::Digit5 {
             algo.name = Algorithm::BFS;
+            return true;
+        }
+
+        if event.key == KeyCode::KeyQ {
+            algo.direction_offset = algo.direction_offset % 8 + 1;
+            println!("{}", algo.direction_offset);
             return true;
         }
     }

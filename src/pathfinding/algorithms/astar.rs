@@ -11,6 +11,7 @@ pub fn setup_and_run_astar(
     grid: &[&Tile],
     current_tile_id: usize,
     is_aggressive: bool,
+    directional_offset: usize,
 ) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     let mut end_tile_pos: Option<(usize, usize)> = None;
     let mut current_tile_pos: (usize, usize) = (0, 0);
@@ -37,7 +38,13 @@ pub fn setup_and_run_astar(
         }
     }
 
-    return astar(nodes, current_tile_pos, end_tile_pos, is_aggressive);
+    return astar(
+        nodes,
+        current_tile_pos,
+        end_tile_pos,
+        is_aggressive,
+        directional_offset,
+    );
 }
 
 fn astar(
@@ -45,6 +52,7 @@ fn astar(
     current_tile_pos: (usize, usize),
     end_tile_pos: Option<(usize, usize)>,
     is_aggressive: bool,
+    offset: usize,
 ) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     let mut heap = BinaryHeap::new();
     let mut visited_order = vec![];
@@ -54,7 +62,7 @@ fn astar(
         ..nodes[current_tile_pos.0][current_tile_pos.1]
     });
 
-    let directions = [
+    let mut directions = [
         (-1, -1),
         (1, -1),
         (1, 1),
@@ -64,6 +72,7 @@ fn astar(
         (0, -1),
         (-1, 0),
     ];
+    directions.rotate_left(offset);
     let end_pos = end_tile_pos.unwrap_or((0, 0));
 
     while let Some(mut node) = heap.pop() {

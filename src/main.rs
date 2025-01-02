@@ -46,7 +46,7 @@ fn main() {
         // Systems: Monitors and Actions
         // .add_plugins(DebugPlugin)
         .add_plugins((
-            // CollidablePlugin,
+            CollidablePlugin,
             EmitCurrentTilePlugin,
             EmitPathfindingPlugin,
             HighlightCursorTilePlugin,

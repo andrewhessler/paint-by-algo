@@ -9,6 +9,7 @@ Pathfinding looked like a fun project. Figured I'd use it to learn Bevy.
 
 ```
 WASD to move
+C - Enable Wall Collision (Default: Disabled)
 ```
 
 Algorithms (Press Number to paint with)
@@ -25,7 +26,7 @@ Maze Algorithms
 1 - Wilsons Bounded (Default)
 2 - Wilsons
 3 - Also Wilsons
-N - For maze generation in whatever state it's in
+N - for maze generation in whatever state it's in
 ```
 
 Build Mode (Left Click builds...)

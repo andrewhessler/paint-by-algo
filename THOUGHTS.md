@@ -374,3 +374,5 @@ Bug where phantom End hangs around, must investigate.
 BFS and DFS done in different weird cool ways, going to add some variations later, but first...!
 
 My life has been watching this worm build mazes, I'm adding a fast maze hotkey.
+
+Fast Maze done, works fine. :)

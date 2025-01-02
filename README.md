@@ -14,9 +14,11 @@ C - Enable Wall Collision (Default: Disabled)
 
 Algorithms (Press Number to paint with)
 ```
-1 - Djikstra (Default)
+1 - Dijkstra (Default)
 2 - AStar
 3 - AggressiveStar
+4 - DFS
+5 - BFS
 J - to pulse pathfinding
 H - to highlight path
 ```
@@ -27,6 +29,7 @@ Maze Algorithms
 2 - Wilsons
 3 - Also Wilsons
 N - for maze generation in whatever state it's in
+M - Toggle fast maze building
 ```
 
 Build Mode (Left Click builds...)

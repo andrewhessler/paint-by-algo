@@ -7,9 +7,12 @@ use std::{
 use bevy::prelude::*;
 
 use crate::{
-    entities::tile::{
-        emit_current::CurrentTileEvent, EndUpdatedEvent, Tile, TileType, COL_COUNT, END_TILE_COLOR,
-        ROW_COUNT, WALL_COLOR,
+    entities::{
+        player::input::{InputAction, PlayerInput},
+        tile::{
+            emit_current::CurrentTileEvent, EndUpdatedEvent, Tile, TileType, COL_COUNT,
+            END_TILE_COLOR, ROW_COUNT, WALL_COLOR,
+        },
     },
     pathfinding::emit_pathfinding::{PathEvent, PathfindingEvent, PathfindingNode},
     terrain::tile_modifier::{BuildType, TerrainAction, TerrainEvent, TerrainGenerationEvent},
@@ -53,6 +56,7 @@ impl Plugin for TileAnimationPlugin {
                 FixedUpdate,
                 (
                     animate_tile,
+                    set_terrain_animation_speed_from_player_input,
                     // initiate_wall_bump_tile_animation,
                     handle_terrain_event,
                     // initiate_animation_by_pathfound_tile,
@@ -141,6 +145,7 @@ fn setup_animation_timers(mut commands: Commands) {
             TimerMode::Repeating,
         ),
         event_queues: vec![],
+        fast: false,
     });
 }
 
@@ -204,6 +209,7 @@ fn initiate_animation_by_pathfound_tile(
 struct TerrainAnimationGate {
     pub timer: Timer,
     pub event_queues: Vec<EventQueueWithTimesFired>,
+    pub fast: bool,
 }
 
 struct EventQueueWithTimesFired {
@@ -284,13 +290,20 @@ fn handle_terrain_event(
     animation_gate.timer.tick(time.delta());
 
     if animation_gate.timer.finished() {
+        let is_fast = animation_gate.fast;
+
         for event_queue in &mut animation_gate.event_queues {
             let range = if event_queue.times_fired < 1 {
                 event_queue.times_fired += 1;
                 ROW_COUNT * COL_COUNT
             } else {
-                1
+                if is_fast {
+                    ROW_COUNT * COL_COUNT
+                } else {
+                    1
+                }
             };
+
             for _ in 0..range {
                 if let Some(event) = event_queue.event_queue.pop_back() {
                     for (tile, mut anim, _mesh, _vis) in &mut q_tiles {
@@ -308,6 +321,17 @@ fn handle_terrain_event(
                     }
                 }
             }
+        }
+    }
+}
+
+fn set_terrain_animation_speed_from_player_input(
+    mut player_input_reader: EventReader<PlayerInput>,
+    mut terrain_animation_gate: ResMut<TerrainAnimationGate>,
+) {
+    for player_input in player_input_reader.read() {
+        if player_input.action == InputAction::Pressed && player_input.key == KeyCode::KeyM {
+            terrain_animation_gate.fast = !terrain_animation_gate.fast;
         }
     }
 }

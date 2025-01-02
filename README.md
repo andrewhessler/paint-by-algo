@@ -14,11 +14,17 @@ H - to highlight path
 ```
 
 Algorithms (Press Number to paint with)
-
 ```
 1 - Djikstra (Default)
 2 - AStar
 3 - AggressiveStar
+```
+
+Maze Algorithms 
+```
+1 - Wilsons Bounded (Default)
+2 - Wilsons
+3 - Also Wilsons
 ```
 
 Build Mode (Left Click builds...)

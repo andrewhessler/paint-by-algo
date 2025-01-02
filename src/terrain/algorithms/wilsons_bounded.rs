@@ -8,7 +8,7 @@ use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng, Rng};
 
 use super::node::{Node, NodeState};
 
-pub fn setup_and_run_wilsons(grid: &[&Tile]) -> Vec<TerrainEvent> {
+pub fn setup_and_run_wilsons_bounded(grid: &[&Tile]) -> Vec<TerrainEvent> {
     /*
      * Create a terrain event to convert every Tile to a wall
      *
@@ -28,11 +28,11 @@ pub fn setup_and_run_wilsons(grid: &[&Tile]) -> Vec<TerrainEvent> {
         });
         nodes[tile.row][tile.col].from_tile(tile);
     }
-    wilsons(nodes, &mut terrain_events);
+    wilsons_bounded(nodes, &mut terrain_events);
     terrain_events
 }
 
-pub fn wilsons(mut grid: Vec<Vec<Node>>, terrain_events: &mut Vec<TerrainEvent>) {
+pub fn wilsons_bounded(mut grid: Vec<Vec<Node>>, terrain_events: &mut Vec<TerrainEvent>) {
     let mut rng = thread_rng();
 
     let seed_row = rng.gen_range(0..ROW_COUNT / 2) * 2;
@@ -103,24 +103,18 @@ fn random_walk(
             continue;
         }
 
-        // bounded
-        // let mut new_row = current_row as isize + dr;
-        // let mut new_col = current_col as isize + dc;
-        //
-        // world wrap
-        let new_row = (((current_row + ROW_COUNT) as isize + dr) as usize % ROW_COUNT) as isize; // add row count to avoid negative index >.> <.<
-        let new_col = (((current_col + COL_COUNT) as isize + dc) as usize % COL_COUNT) as isize;
+        let new_row = current_row as isize + dr;
+        let new_col = current_col as isize + dc;
         if in_bounds(new_row, new_col) {
             last_direction = (-dr, -dc);
             let u_new_row = new_row as usize;
             let u_new_col = new_col as usize;
 
-            let intermediate_row = ((new_row - dr / 2) + ROW_COUNT as isize) as usize % ROW_COUNT;
-            let intermediate_col = ((new_col - dc / 2) + COL_COUNT as isize) as usize % COL_COUNT;
             // flip the one behind you
-            let intermediate_node = &mut grid[intermediate_row][intermediate_col];
+            let intermediate_node =
+                &mut grid[(new_row - dr / 2) as usize][(new_col - dc / 2) as usize];
             intermediate_node.state = NodeState::Current;
-            path.push((intermediate_row, intermediate_col));
+            path.push((intermediate_node.row, intermediate_node.col));
             terrain_events.push(TerrainEvent {
                 tile_id: intermediate_node.tile_id,
                 action: TerrainAction::Removed,

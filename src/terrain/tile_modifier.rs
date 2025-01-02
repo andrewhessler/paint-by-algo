@@ -5,7 +5,10 @@ use crate::entities::{
     tile::{emit_current::CurrentMouseTileEvent, Tile, TileType, COL_COUNT, ROW_COUNT},
 };
 
-use super::algorithms::wilsons::setup_and_run_wilsons;
+use super::algorithms::{
+    wilsons::setup_and_run_wilsons, wilsons_bounded::setup_and_run_wilsons_bounded,
+    TerrainAlgorithm,
+};
 
 #[derive(Clone)]
 pub struct TerrainEvent {
@@ -37,14 +40,16 @@ impl Plugin for TileModifierPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<TerrainGenerationEvent>()
             .insert_resource(BuildType::Wall)
+            .insert_resource(TerrainAlgorithm::WilsonsBounded)
             .add_systems(
                 FixedUpdate,
                 (
-                    build_maze_with_wilsons,
+                    build_maze_with_algorithm,
                     fill_with_walls,
                     manage_wall_placement,
                     manage_build_type,
                     build_walls_to_block_world_wrap,
+                    set_algorithm_from_key_input,
                 ),
             );
     }
@@ -126,18 +131,43 @@ fn fill_with_walls(
     }
 }
 
-fn build_maze_with_wilsons(
+fn build_maze_with_algorithm(
     q_tiles: Query<&Tile>,
     mut player_input_reader: EventReader<PlayerInput>,
     mut maze_gen_writer: EventWriter<TerrainGenerationEvent>,
+    algo: Res<TerrainAlgorithm>,
 ) {
     for input in player_input_reader.read() {
         if input.action == InputAction::Pressed && input.key == KeyCode::KeyN {
             let tiles: Vec<&Tile> = q_tiles.iter().collect();
-            let events = setup_and_run_wilsons(&tiles);
+            let events = match *algo {
+                TerrainAlgorithm::Wilsons => setup_and_run_wilsons(&tiles),
+                TerrainAlgorithm::WilsonsBounded => setup_and_run_wilsons_bounded(&tiles),
+            };
             maze_gen_writer.send(TerrainGenerationEvent {
                 terrain_events: events,
             });
+        }
+    }
+}
+
+fn set_algorithm_from_key_input(
+    mut algo: ResMut<TerrainAlgorithm>,
+    mut player_input_reader: EventReader<PlayerInput>,
+) {
+    for event in player_input_reader.read() {
+        if event.action == InputAction::Pressed {
+            if event.key == KeyCode::Digit1 {
+                *algo = TerrainAlgorithm::WilsonsBounded;
+            }
+
+            if event.key == KeyCode::Digit2 {
+                *algo = TerrainAlgorithm::Wilsons;
+            }
+
+            if event.key == KeyCode::Digit3 {
+                *algo = TerrainAlgorithm::Wilsons;
+            }
         }
     }
 }

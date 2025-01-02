@@ -131,6 +131,12 @@ fn handle_terrain_event(
                 if event.action == TerrainAction::Added {
                     if is_current_tile {
                         if event.build_type == BuildType::Wall {
+                            if tile.tile_type == TileType::End {
+                                end_updated_writer.send(EndUpdatedEvent {
+                                    new_end_id: None,
+                                    old_end_id: Some(tile.id),
+                                });
+                            }
                             tile.tile_type = TileType::Wall;
                             commands.entity(entity_id).insert(Collidable);
                         }

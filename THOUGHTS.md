@@ -364,3 +364,13 @@ Got something close to right very clumsily. I'll need to spend a bit debugging i
 So much is a mess, I just kept going, some planning would've helped. I'm sure I could do better next time. Chalk it up to Rust noobiness?
 
 Think I got Wilson's working, need to validate it more, but it seems to be a completely connected maze at least.
+
+
+### BFS & DFS
+Want to work on these, got distracted by toggleable collision. But also more wall generation would be fun.
+
+Bug where phantom End hangs around, must investigate.
+
+BFS and DFS done in different weird cool ways, going to add some variations later, but first...!
+
+My life has been watching this worm build mazes, I'm adding a fast maze hotkey.

@@ -19,16 +19,16 @@ pub fn setup_and_run_astar(
     let mut nodes: Vec<Vec<Node>> = vec![vec![Node::default(); COL_COUNT]; ROW_COUNT];
 
     for tile in grid {
+        let row = tile.row as usize;
+        let col = tile.col as usize;
         if tile.tile_type == TileType::End {
-            end_tile_pos = Some((tile.row, tile.col));
+            end_tile_pos = Some((row, col));
         }
 
         if tile.id == current_tile_id {
-            current_tile_pos = (tile.row, tile.col);
+            current_tile_pos = (row, col);
         }
 
-        let row = tile.row as usize;
-        let col = tile.col as usize;
         nodes[row][col].from_tile(tile);
 
         if tile.tile_type == TileType::Wall {

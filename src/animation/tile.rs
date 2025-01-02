@@ -11,16 +11,14 @@ use crate::{
         emit_current::CurrentTileEvent, EndUpdatedEvent, Tile, TileType, COL_COUNT, END_TILE_COLOR,
         ROW_COUNT, WALL_COLOR,
     },
-    pathfinding::emit_pathfinding::{
-        PathEvent, PathfindingEvent, PathfindingEventType, PathfindingNode,
-    },
+    pathfinding::emit_pathfinding::{PathEvent, PathfindingEvent, PathfindingNode},
     terrain::tile_modifier::{BuildType, TerrainAction, TerrainEvent, TerrainGenerationEvent},
 };
 
 const TILE_ANIMATION_MAX_SCALE: f32 = 1.3;
 const TILE_ANIMATION_STEP: f32 = 3.0;
 const PATHFINDING_ANIMATION_DELAY_MS: u64 = 1;
-const PATHFINDING_TILE_BATCH: u64 = 5;
+const PATHFINDING_TILE_BATCH: u64 = 1;
 
 pub struct TileAnimationPlugin;
 
@@ -245,9 +243,10 @@ fn handle_terrain_event(
             }
         }
         if let Some(old_end) = event.old_end_id {
-            for (tile, _anim, _mesh, mut vis) in &mut q_tiles {
+            for (tile, mut anim, _mesh, mut vis) in &mut q_tiles {
                 if tile.id == old_end {
                     *vis = Visibility::Hidden;
+                    anim.state = TileAnimationState::Initiated;
                 }
             }
         }

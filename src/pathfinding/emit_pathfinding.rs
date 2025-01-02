@@ -5,10 +5,13 @@ use crate::{
         player::input::{InputAction, PlayerInput},
         tile::{emit_current::CurrentTileEvent, Tile},
     },
-    terrain::tile_modifier::{TerrainEvent, TerrainGenerationEvent},
+    terrain::tile_modifier::TerrainGenerationEvent,
 };
 
-use super::algorithms::{astar::setup_and_run_astar, dijkstra::setup_and_run_dijkstra, Algorithm};
+use super::algorithms::{
+    astar::setup_and_run_astar, bfs::setup_and_run_bfs, dfs::setup_and_run_dfs,
+    dijkstra::setup_and_run_dijkstra, Algorithm,
+};
 
 pub struct EmitPathfindingPlugin;
 
@@ -16,7 +19,9 @@ impl Plugin for EmitPathfindingPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<PathfindingEvent>()
             .add_event::<PathEvent>()
-            .add_systems(Startup, setup_algo_in_use)
+            .insert_resource(AlgorithmInUse {
+                name: Algorithm::Dijkstra,
+            })
             .add_systems(FixedUpdate, trigger_pathfinding_by_button);
     }
 }
@@ -36,21 +41,9 @@ pub struct PathfindingNode {
     pub tile_id: usize,
 }
 
-#[derive(Debug, Clone)]
-pub enum PathfindingEventType {
-    Visited,
-    Path,
-}
-
 #[derive(Resource)]
 pub struct AlgorithmInUse {
     name: Algorithm,
-}
-
-fn setup_algo_in_use(mut commands: Commands) {
-    commands.insert_resource(AlgorithmInUse {
-        name: Algorithm::Dijkstra,
-    });
 }
 
 fn run_algo(
@@ -61,6 +54,8 @@ fn run_algo(
     match algo.name {
         Algorithm::AStar => setup_and_run_astar(&tiles, *current_tile_id, false),
         Algorithm::AgressiveStar => setup_and_run_astar(&tiles, *current_tile_id, true),
+        Algorithm::BFS => setup_and_run_bfs(&tiles, *current_tile_id),
+        Algorithm::DFS => setup_and_run_dfs(&tiles, *current_tile_id),
         Algorithm::Dijkstra => setup_and_run_dijkstra(&tiles, *current_tile_id),
     }
 }
@@ -134,6 +129,16 @@ fn set_algorithm_from_key_input(event: &PlayerInput, algo: &mut ResMut<Algorithm
 
         if event.key == KeyCode::Digit3 {
             algo.name = Algorithm::AgressiveStar;
+            return true;
+        }
+
+        if event.key == KeyCode::Digit4 {
+            algo.name = Algorithm::DFS;
+            return true;
+        }
+
+        if event.key == KeyCode::Digit5 {
+            algo.name = Algorithm::BFS;
             return true;
         }
     }

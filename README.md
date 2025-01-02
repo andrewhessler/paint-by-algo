@@ -2,7 +2,7 @@
 
 # Paint By Algorithms (aka Bevy Pathfinder)
 
-Pathfinding looked like a fun project. Figured I'd use it to learn Bevy.
+Algorithm playground
 
 ## How to run
 `cargo run`

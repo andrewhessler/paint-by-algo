@@ -9,8 +9,6 @@ Pathfinding looked like a fun project. Figured I'd use it to learn Bevy.
 
 ```
 WASD to move
-J - to pulse pathfinding
-H - to highlight path
 ```
 
 Algorithms (Press Number to paint with)
@@ -18,6 +16,8 @@ Algorithms (Press Number to paint with)
 1 - Djikstra (Default)
 2 - AStar
 3 - AggressiveStar
+J - to pulse pathfinding
+H - to highlight path
 ```
 
 Maze Algorithms 
@@ -25,6 +25,7 @@ Maze Algorithms
 1 - Wilsons Bounded (Default)
 2 - Wilsons
 3 - Also Wilsons
+N - For maze generation in whatever state it's in
 ```
 
 Build Mode (Left Click builds...)
@@ -38,9 +39,5 @@ Default Builds
 ```
 Z - Build Walls around edge of world wrap
 F - To fill the screen with Walls
-N - For maze generation in whatever state it's in
 ```
 
-## Roadmap
-
-1. Show `Path`

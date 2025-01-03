@@ -49,6 +49,6 @@ Right-Click - Remove
 Default Builds 
 ```
 Z - Build Walls around edge of world wrap
-F - To fill the screen with Walls
+F - To fill or clear Walls 
 ```
 

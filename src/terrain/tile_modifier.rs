@@ -22,7 +22,7 @@ pub struct TerrainGenerationEvent {
     pub terrain_events: Vec<TerrainEvent>,
 }
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum TerrainAction {
     Added,
     Removed,
@@ -112,15 +112,22 @@ fn fill_with_walls(
     q_tiles: Query<&Tile>,
     mut player_input_reader: EventReader<PlayerInput>,
     mut terrain_gen_writer: EventWriter<TerrainGenerationEvent>,
+    mut is_filled: Local<bool>,
 ) {
     for input in player_input_reader.read() {
         if input.action == InputAction::Pressed && input.key == KeyCode::KeyF {
             let tiles: Vec<&Tile> = q_tiles.iter().collect();
             let mut walls = vec![];
+            let action = if *is_filled {
+                TerrainAction::Removed
+            } else {
+                TerrainAction::Added
+            };
+            *is_filled = !*is_filled;
             for tile in tiles {
                 walls.push(TerrainEvent {
                     tile_id: tile.id,
-                    action: TerrainAction::Added,
+                    action,
                     build_type: BuildType::Wall,
                 });
             }

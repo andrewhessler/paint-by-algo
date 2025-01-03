@@ -149,7 +149,7 @@ fn set_algorithm_from_key_input(event: &PlayerInput, algo: &mut ResMut<Algorithm
         }
 
         if event.key == KeyCode::KeyQ {
-            algo.direction_offset = algo.direction_offset % 8 + 1;
+            algo.direction_offset = (algo.direction_offset + 1) % 8;
             return true;
         }
 

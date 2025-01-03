@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, usize};
 
 use crate::entities::tile::Tile;
 
@@ -9,6 +9,7 @@ pub struct Node {
     pub col: usize,
     pub is_wall: bool,
     pub distance: usize,
+    pub g_score: usize,
     pub visited: bool,
     pub previous_node: Option<(usize, usize)>,
 }
@@ -32,6 +33,7 @@ impl Default for Node {
             col: 0,
             is_wall: false,
             distance: usize::MAX,
+            g_score: usize::MAX,
             visited: false,
             previous_node: None,
         }

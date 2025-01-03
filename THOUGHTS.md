@@ -389,3 +389,18 @@ Rotate direction list for pathfinding, randomize direction list for pathfinding,
 
 ### Struggles with A*
 I'm learning more about the algorithms. I feel like bounded A* doesn't look right... it should be more focused. Going to investigate.
+
+Why does my AStar look so wrong??? hmm...
+
+Oh, there's an extra f = g + h thing, thought I could just throw on the heuristic. Guess I should thoroughly read.
+
+Got it got it, min heaped by f score, readmittance through g score. Hopefully that's all I was missing. Wikipedia pseudocode very helpful.
+
+My A* is now absolutely insane in the worst way.
+
+I think I got it! Important to be intentional with these algorithms lol
+
+Also, damn, logging can be expensive.
+
+### Alright
+I think that's the gist of it, just cleaning now, maybe some slow tiles that are at a different saturation. Mostly cleaning though.

@@ -6,7 +6,10 @@ use crate::{
     pathfinding::emit_pathfinding::{AlgorithmInUse, PathfindingNode},
 };
 
-use super::{node::Node, util::in_bounds};
+use super::{
+    node::Node,
+    util::{handle_world_wrap_for_coords, in_bounds},
+};
 
 /*
  * Okay here's the plan for dfs
@@ -121,20 +124,12 @@ fn dfs(
     }
 
     for (dr, dc) in directions {
-        let visit_row;
-        let visit_col;
-        if algo.world_wrap_enabled {
-            visit_row = ((current_row + ROW_COUNT) as isize + dr) as usize % ROW_COUNT; // add row count to avoid negative index >.> <.<
-            visit_col = ((current_col + COL_COUNT) as isize + dc) as usize % COL_COUNT;
-        } else {
-            let i_visit_row = current_row as isize + dr;
-            let i_visit_col = current_col as isize + dc;
-            if in_bounds(i_visit_row, i_visit_col) {
-                visit_row = i_visit_row as usize;
-                visit_col = i_visit_col as usize;
-            } else {
-                continue;
-            }
+        let (visit_row, visit_col) =
+            handle_world_wrap_for_coords(algo, (current_row, current_col), (dr, dc))
+                .unwrap_or((usize::MAX, usize::MAX));
+
+        if (visit_row, visit_col) == (usize::MAX, usize::MAX) {
+            continue;
         }
         in_path |= dfs(
             grid,

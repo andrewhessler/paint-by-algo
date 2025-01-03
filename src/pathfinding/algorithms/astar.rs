@@ -54,10 +54,10 @@ fn astar(
     let mut heap = BinaryHeap::new();
     let mut visited_order = vec![];
     let mut path = vec![];
-    heap.push(Reverse(Node {
+    heap.push(Node {
         distance: 0,
         ..nodes[current_tile_pos.0][current_tile_pos.1]
-    }));
+    });
 
     let mut directions = [
         (-1, -1),
@@ -76,7 +76,7 @@ fn astar(
     }
     let end_pos = end_tile_pos.unwrap_or((0, 0));
 
-    while let Some(Reverse(mut node)) = heap.pop() {
+    while let Some(mut node) = heap.pop() {
         if node.visited == true || node.is_wall {
             continue;
         }
@@ -116,11 +116,9 @@ fn astar(
             let mut dx = end_pos.1 as isize - visit_col as isize;
             let mut dy = end_pos.0 as isize - visit_row as isize;
             if dx.abs() > COL_COUNT as isize / 2 && algo.world_wrap_enabled {
-                println!("Whatup");
                 dx = COL_COUNT as isize - dx.abs();
             }
             if dy.abs() > ROW_COUNT as isize / 2 && algo.world_wrap_enabled {
-                println!("Whatup");
                 dy = ROW_COUNT as isize - dy.abs();
             }
             let distance_between_checked_and_end = ((dx.pow(2) + dy.pow(2)) as f64).sqrt();
@@ -145,7 +143,7 @@ fn astar(
                 checked_node.distance = new_distance;
                 checked_node.previous_node = Some((node.row, node.col));
                 checked_node.visited = false;
-                heap.push(Reverse(Node { ..*checked_node }));
+                heap.push(Node { ..*checked_node });
             }
         }
     }

@@ -1,7 +1,7 @@
 use rand::{seq::SliceRandom, thread_rng};
 
 use super::{node::Node, util::in_bounds};
-use std::{cmp::Reverse, collections::BinaryHeap};
+use std::collections::BinaryHeap;
 
 use crate::{
     entities::tile::{Tile, TileType, COL_COUNT, ROW_COUNT},
@@ -51,10 +51,10 @@ fn dijkstra(
     let mut heap = BinaryHeap::new();
     let mut visited_order = vec![];
     let mut path = vec![];
-    heap.push(Reverse(Node {
+    heap.push(Node {
         distance: 0,
         ..nodes[current_tile_pos.0][current_tile_pos.1]
-    }));
+    });
 
     let mut directions = [
         (-1, -1),
@@ -73,7 +73,7 @@ fn dijkstra(
     }
 
     let end_pos = end_tile_pos.unwrap_or((0, 0));
-    while let Some(Reverse(mut node)) = heap.pop() {
+    while let Some(mut node) = heap.pop() {
         if node.visited == true || node.is_wall {
             continue;
         }
@@ -112,16 +112,12 @@ fn dijkstra(
 
             let checked_node = &mut nodes[visit_row][visit_col];
             let new_distance = node.distance + directional_distance;
-            // event_order.push(PathfindingEvent {
-            //     tile_id: checked_node.tile_id,
-            //     event_type: PathfindingEventType::Checked,
-            // });
 
             if new_distance < checked_node.distance {
                 checked_node.distance = new_distance;
                 checked_node.previous_node = Some((node.row, node.col));
                 checked_node.visited = false;
-                heap.push(Reverse(Node { ..*checked_node }));
+                heap.push(Node { ..*checked_node });
             }
         }
     }

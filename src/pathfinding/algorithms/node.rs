@@ -14,7 +14,7 @@ pub struct Node {
 }
 impl Ord for Node {
     fn cmp(&self, other: &Self) -> Ordering {
-        other.distance.cmp(&self.distance)
+        other.distance.cmp(&self.distance) // backwards makes min heap
     }
 }
 

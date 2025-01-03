@@ -387,6 +387,5 @@ Nah, I still doubt DFS, but maybe I'll show someone and they'll tell me if it's 
 ### Random QoL Modifiers
 Rotate direction list for pathfinding, randomize direction list for pathfinding, and toggle world wrap for pathfinding.
 
-### A* definitely broken
-Awesome, so using max heap instead of min heap, and after switching to min heap, A* looks all wrong.
-My hunches were on track lol
+### Struggles with A*
+I'm learning more about the algorithms. I feel like bounded A* doesn't look right... it should be more focused. Going to investigate.

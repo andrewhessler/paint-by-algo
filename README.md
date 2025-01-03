@@ -13,6 +13,19 @@ WASD to move
 C - Enable Wall Collision (Default: Disabled)
 ```
 
+Build Mode (Left Click builds...)
+```
+R - Wall (Default)
+E - End
+Right-Click - Remove
+```
+
+Default Builds 
+```
+Z - Build Walls around edge of world wrap
+F - To fill or clear Walls 
+```
+
 Algorithms (Press Number to paint with)
 ```
 1 - Dijkstra (Default)
@@ -39,16 +52,4 @@ N - to generate maze
 M - Toggle fast maze building
 ```
 
-Build Mode (Left Click builds...)
-```
-R - Wall (Default)
-E - End
-Right-Click - Remove
-```
-
-Default Builds 
-```
-Z - Build Walls around edge of world wrap
-F - To fill or clear Walls 
-```
 

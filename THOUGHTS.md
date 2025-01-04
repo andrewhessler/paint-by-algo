@@ -411,3 +411,5 @@ Mostly cleaning though.
 Time to go ask for feedback!
 
 I moved pretty much everything from FixedUpdate to Update. Gonna move the more CPU-bound things to FixedUpdate? Should probably be using some async for them.
+
+Too bad collision still sucks.

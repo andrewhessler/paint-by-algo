@@ -2,9 +2,6 @@ use bevy::prelude::*;
 
 use crate::entities::tile::{emit_current::CurrentMouseTileEvent, TILE_SIZE};
 
-#[derive(Component)]
-pub struct Highlighter;
-
 pub struct HighlightCursorTilePlugin;
 
 impl Plugin for HighlightCursorTilePlugin {
@@ -13,6 +10,9 @@ impl Plugin for HighlightCursorTilePlugin {
             .add_systems(Update, move_and_show_highlighter);
     }
 }
+
+#[derive(Component)]
+pub struct Highlighter;
 
 fn spawn_highlighter(
     mut commands: Commands,

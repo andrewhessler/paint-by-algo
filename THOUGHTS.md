@@ -403,4 +403,5 @@ I think I got it! Important to be intentional with these algorithms lol
 Also, damn, logging can be expensive.
 
 ### Alright
-I think that's the gist of it, just cleaning now, maybe some slow tiles that are at a different saturation. Mostly cleaning though.
+I think that's the gist of it, just cleaning now, maybe some slow tiles that are at a different saturation, maybe algorithms that make flowers or something.
+Mostly cleaning though.

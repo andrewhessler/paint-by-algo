@@ -5,7 +5,7 @@
 Algorithm playground
 
 
-## How to run
+## How to play
 `cargo run`
 
 ```

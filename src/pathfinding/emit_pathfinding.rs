@@ -29,12 +29,14 @@ impl Plugin for EmitPathfindingPlugin {
             .add_systems(
                 FixedUpdate,
                 (
-                    emit_pathfinding_by_button,
                     precalc_on_algo_change,
                     precalc_on_current_tile,
                     precalc_on_terrain_generation,
-                    set_algorithm_from_key_input,
                 ),
+            )
+            .add_systems(
+                Update,
+                (emit_pathfinding_by_button, set_algorithm_from_key_input),
             );
     }
 }

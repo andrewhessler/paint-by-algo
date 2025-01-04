@@ -42,7 +42,7 @@ impl Plugin for TileModifierPlugin {
             .insert_resource(BuildType::Wall)
             .insert_resource(TerrainAlgorithm::WilsonsBounded)
             .add_systems(
-                FixedUpdate,
+                Update,
                 (
                     build_maze_with_algorithm,
                     fill_with_walls,
@@ -99,11 +99,11 @@ fn build_walls_to_block_world_wrap(
                         build_type: BuildType::Wall,
                         action: action.clone(),
                     });
-                    terrain_gen_writer.send(TerrainGenerationEvent {
-                        terrain_events: walls.clone(),
-                    });
                 }
             }
+            terrain_gen_writer.send(TerrainGenerationEvent {
+                terrain_events: walls.clone(),
+            });
         }
     }
 }

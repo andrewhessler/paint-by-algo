@@ -1,6 +1,7 @@
 use animation::highlight_cursor_tile::HighlightCursorTilePlugin;
 use animation::tile::TileAnimationPlugin;
 use bevy::prelude::*;
+use bevy::window::WindowMode;
 use collision::collidable::CollidablePlugin;
 use current_tile::emitter::EmitCurrentTilePlugin;
 use entities::camera::SceneCameraPlugin;
@@ -40,13 +41,18 @@ mod terrain {
 }
 
 fn main() {
+    let window_plugin = WindowPlugin {
+        primary_window: Some(Window {
+            title: "Paint By Algo".into(),
+            mode: WindowMode::BorderlessFullscreen(MonitorSelection::Primary),
+            ..default()
+        }),
+        ..default()
+    };
+
     App::new()
-        .add_plugins(DefaultPlugins)
-        // ***************************************
-        // Entities
+        .add_plugins(DefaultPlugins.set(window_plugin))
         .add_plugins((PlayerPlugin, GroundPlugin, TilePlugin, SceneCameraPlugin))
-        // ***************************************
-        // Systems: Monitors and Actions
         .add_plugins((
             CollidablePlugin,
             EmitCurrentTilePlugin,
@@ -57,17 +63,8 @@ fn main() {
             TileAnimationPlugin,
             TileModifierPlugin,
         ))
-        // .add_plugins(DebugPlugin)
-        // .add_systems(PostStartup, print_entities)
+        //        .add_plugins(DebugPlugin)
         .run();
 }
 
 // use debug::DebugPlugin;
-// fn print_entities(world: &World, query: Query<Entity>) {
-//     for entity in &query {
-//         let components = world.inspect_entity(entity);
-//         for component in components {
-//             println!("{:?}", component);
-//         }
-//     }
-// }

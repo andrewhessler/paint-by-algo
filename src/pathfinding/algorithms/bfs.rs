@@ -112,7 +112,9 @@ fn bfs(
             path.push(PathfindingNode {
                 tile_id: path_node.tile_id,
             });
-            if (path_node.row, path_node.col) == (current_row, current_col) {
+            if (path_node.row, path_node.col) == (current_row, current_col)
+                || path_node.previous_node.is_none()
+            {
                 break;
             }
             path_node =

@@ -25,7 +25,7 @@ impl Plugin for TilePlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<EndUpdatedEvent>()
             .add_systems(Startup, spawn_tile_grid)
-            .add_systems(FixedUpdate, handle_terrain_event);
+            .add_systems(Update, handle_terrain_event);
     }
 }
 

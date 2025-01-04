@@ -60,16 +60,15 @@ pub struct PlayerMovementPlugin;
 
 impl Plugin for PlayerMovementPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            FixedUpdate,
+        app.add_systems(FixedUpdate, player_movement).add_systems(
+            Update,
             (
-                player_movement,
+                teleport_player_at_bounds,
                 rebound_player,
                 set_player_direction_from_input,
-                teleport_player_at_bounds,
+                transform_movement_interpolate,
             ),
-        )
-        .add_systems(Update, transform_movement_interpolate);
+        );
     }
 }
 

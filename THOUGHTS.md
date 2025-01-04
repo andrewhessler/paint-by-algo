@@ -405,3 +405,9 @@ Also, damn, logging can be expensive.
 ### Alright
 I think that's the gist of it, just cleaning now, maybe some slow tiles that are at a different saturation, maybe algorithms that make flowers or something.
 Mostly cleaning though.
+
+
+### Feedback
+Time to go ask for feedback!
+
+I moved pretty much everything from FixedUpdate to Update. Gonna move the more CPU-bound things to FixedUpdate? Should probably be using some async for them.

@@ -11,7 +11,7 @@ impl Plugin for CollidablePlugin {
         app.add_event::<CollidedEvent>()
             .insert_resource(CollideStatus::Disabled)
             .add_systems(
-                FixedUpdate,
+                Update,
                 (emit_collided_event, set_collide_status_on_keyboard_input),
             );
     }

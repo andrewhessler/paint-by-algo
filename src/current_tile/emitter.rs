@@ -11,7 +11,7 @@ impl Plugin for EmitCurrentTilePlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<CurrentTileEvent>()
             .add_event::<CurrentMouseTileEvent>()
-            .add_systems(FixedUpdate, (emit_current_tile, emit_current_mouse_tile));
+            .add_systems(Update, (emit_current_tile, emit_current_mouse_tile));
     }
 }
 

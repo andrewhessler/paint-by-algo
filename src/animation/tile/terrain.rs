@@ -1,16 +1,12 @@
-use std::{collections::VecDeque, time::Duration};
-
 use bevy::prelude::*;
 
+use super::{TileAnimation, TileAnimationState};
+use crate::input::{InputAction, KeyboardInputEvent};
 use crate::{
-    entities::{
-        player::input::{InputAction, PlayerInput},
-        tile::{EndUpdatedEvent, Tile, COL_COUNT, END_TILE_COLOR, ROW_COUNT, WALL_COLOR},
-    },
+    entities::tile::{EndUpdatedEvent, Tile, COL_COUNT, END_TILE_COLOR, ROW_COUNT, WALL_COLOR},
     terrain::tile_modifier::{TerrainAction, TerrainEvent, TerrainGenerationEvent},
 };
-
-use super::{TileAnimation, TileAnimationState};
+use std::{collections::VecDeque, time::Duration};
 
 const TERRAIN_ANIMATION_DELAY_MS: u64 = 1;
 const TERRAIN_TILE_BATCH: u64 = 1;
@@ -33,7 +29,7 @@ impl Plugin for TerrainTileAnimationPlugin {
                 initiate_animation,
                 handle_terrain_event,
                 handle_end_event,
-                set_terrain_animation_speed_from_player_input,
+                set_terrain_animation_speed_from_keyboard_input,
             ),
         );
     }
@@ -166,12 +162,12 @@ fn handle_end_event(
     }
 }
 
-fn set_terrain_animation_speed_from_player_input(
-    mut player_input_reader: EventReader<PlayerInput>,
+fn set_terrain_animation_speed_from_keyboard_input(
+    mut keyboard_input_reader: EventReader<KeyboardInputEvent>,
     mut terrain_animation_gate: ResMut<TerrainAnimationGate>,
 ) {
-    for player_input in player_input_reader.read() {
-        if player_input.action == InputAction::Pressed && player_input.key == KeyCode::KeyM {
+    for keyboard_input in keyboard_input_reader.read() {
+        if keyboard_input.action == InputAction::Pressed && keyboard_input.key == KeyCode::KeyM {
             terrain_animation_gate.fast_mode_enabled = !terrain_animation_gate.fast_mode_enabled;
         }
     }

@@ -1,13 +1,12 @@
 use bevy::prelude::*;
 
+use crate::input::{InputAction, KeyboardInputEvent};
 use crate::{
     collision::collidable::CollidedEvent,
     entities::ground::{
         GROUND_B_BORDER, GROUND_H, GROUND_L_BORDER, GROUND_R_BORDER, GROUND_T_BORDER, GROUND_W,
     },
 };
-
-use super::input::{InputAction, PlayerInput};
 
 #[derive(Component)]
 pub(crate) struct PlayerMovement {
@@ -70,15 +69,15 @@ impl Plugin for PlayerMovementPlugin {
                 teleport_player_at_bounds,
             ),
         )
-        .add_systems(Update, (transform_movement_interpolate));
+        .add_systems(Update, transform_movement_interpolate);
     }
 }
 
 fn set_player_direction_from_input(
-    mut player_input_event_reader: EventReader<PlayerInput>,
+    mut keyboard_input_reader: EventReader<KeyboardInputEvent>,
     mut movement: Query<&mut PlayerMovement>,
 ) {
-    for event in player_input_event_reader.read() {
+    for event in keyboard_input_reader.read() {
         for mut m in &mut movement {
             match event.action {
                 InputAction::Pressed => match event.key {

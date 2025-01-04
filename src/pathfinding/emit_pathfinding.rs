@@ -1,12 +1,8 @@
 use bevy::prelude::*;
 
-use crate::{
-    entities::{
-        player::input::{InputAction, PlayerInput},
-        tile::{emit_current::CurrentTileEvent, Tile},
-    },
-    terrain::tile_modifier::TerrainGenerationEvent,
-};
+use crate::current_tile::emitter::CurrentTileEvent;
+use crate::input::{InputAction, KeyboardInputEvent};
+use crate::{entities::tile::Tile, terrain::tile_modifier::TerrainGenerationEvent};
 
 use super::algorithms::{
     astar::setup_and_run_astar, bfs::setup_and_run_bfs, dfs::setup_and_run_dfs,
@@ -68,7 +64,7 @@ fn run_algo(
 
 fn trigger_pathfinding_by_button(
     tiles: Query<&Tile>,
-    mut player_input_reader: EventReader<PlayerInput>,
+    mut keyboard_input_reader: EventReader<KeyboardInputEvent>,
     mut terrain_gen_reader: EventReader<TerrainGenerationEvent>,
     mut current_tile_reader: EventReader<CurrentTileEvent>,
     mut pathfinding_writer: EventWriter<PathfindingEvent>,
@@ -93,7 +89,7 @@ fn trigger_pathfinding_by_button(
         *pre_calced_path = path;
     }
 
-    for input in player_input_reader.read() {
+    for input in keyboard_input_reader.read() {
         let needs_recalc = set_algorithm_from_key_input(input, &mut algo);
         if needs_recalc {
             let tiles: Vec<&Tile> = tiles.iter().collect();
@@ -121,7 +117,10 @@ fn trigger_pathfinding_by_button(
     }
 }
 
-fn set_algorithm_from_key_input(event: &PlayerInput, algo: &mut ResMut<AlgorithmInUse>) -> bool {
+fn set_algorithm_from_key_input(
+    event: &KeyboardInputEvent,
+    algo: &mut ResMut<AlgorithmInUse>,
+) -> bool {
     if event.action == InputAction::Pressed {
         if event.key == KeyCode::Digit1 {
             algo.name = Algorithm::Dijkstra;

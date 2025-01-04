@@ -1,14 +1,10 @@
 use bevy::prelude::*;
 use movement::PlayerMovement;
 
-const PLAYER_COLOR: Color = Color::hsl(0., 1.0, 0.5);
-const PLAYER_SPEED: f32 = 300.;
-
-pub mod input;
 pub mod movement;
 
-#[derive(Component)]
-pub struct Player;
+const PLAYER_COLOR: Color = Color::hsl(0., 1.0, 0.5);
+const PLAYER_SPEED: f32 = 300.;
 
 pub struct PlayerPlugin;
 
@@ -17,6 +13,9 @@ impl Plugin for PlayerPlugin {
         app.add_systems(Startup, spawn_player);
     }
 }
+
+#[derive(Component)]
+pub struct Player;
 
 fn spawn_player(
     mut commands: Commands,

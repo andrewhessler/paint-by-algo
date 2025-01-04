@@ -1,15 +1,13 @@
-use std::sync::atomic::{AtomicUsize, Ordering};
-
 use bevy::prelude::*;
 
+use super::ground::{GROUND_H, GROUND_W};
 use crate::{
     animation::tile::{TileAnimation, TileAnimationState},
     collision::collidable::Collidable,
     entities::ground::{GROUND_L_BORDER, GROUND_T_BORDER},
-    terrain::tile_modifier::{BuildType, TerrainAction, TerrainEvent, TerrainGenerationEvent},
+    terrain::tile_modifier::{BuildType, TerrainAction, TerrainGenerationEvent},
 };
-
-use super::ground::{GROUND_H, GROUND_W};
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 pub const TEMP_TILE_COLOR_1: Color = Color::hsl(117., 0.67, 0.58);
 pub const TEMP_TILE_COLOR_2: Color = Color::hsla(171., 0.35, 0.68, 0.50);
@@ -21,7 +19,15 @@ pub const TILE_OFFSET: f32 = TILE_SIZE / 2.;
 pub const ROW_COUNT: usize = (GROUND_H / TILE_SIZE) as usize;
 pub const COL_COUNT: usize = (GROUND_W / TILE_SIZE) as usize;
 
-pub mod emit_current;
+pub struct TilePlugin;
+
+impl Plugin for TilePlugin {
+    fn build(&self, app: &mut App) {
+        app.add_event::<EndUpdatedEvent>()
+            .add_systems(Startup, spawn_tile_grid)
+            .add_systems(FixedUpdate, handle_terrain_event);
+    }
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum TileType {
@@ -55,14 +61,9 @@ impl Default for Tile {
     }
 }
 
-pub struct TilePlugin;
-
-impl Plugin for TilePlugin {
-    fn build(&self, app: &mut App) {
-        app.add_event::<EndUpdatedEvent>()
-            .add_systems(Startup, spawn_tile_grid)
-            .add_systems(FixedUpdate, handle_terrain_event);
-    }
+static COUNTER: AtomicUsize = AtomicUsize::new(1);
+fn get_tile_id() -> usize {
+    COUNTER.fetch_add(1, Ordering::SeqCst)
 }
 
 fn spawn_tile_grid(
@@ -173,9 +174,4 @@ fn handle_terrain_event(
             }
         }
     }
-}
-
-static COUNTER: AtomicUsize = AtomicUsize::new(1);
-fn get_tile_id() -> usize {
-    COUNTER.fetch_add(1, Ordering::SeqCst)
 }

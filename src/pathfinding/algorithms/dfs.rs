@@ -1,15 +1,10 @@
-use rand::seq::SliceRandom;
-use rand::thread_rng;
-
+use super::{node::Node, util::handle_world_wrap_for_coords};
 use crate::{
     entities::tile::{Tile, TileType, COL_COUNT, ROW_COUNT},
     pathfinding::emit_pathfinding::{AlgorithmInUse, PathfindingNode},
 };
-
-use super::{
-    node::Node,
-    util::{handle_world_wrap_for_coords, in_bounds},
-};
+use rand::seq::SliceRandom;
+use rand::thread_rng;
 
 /*
  * Okay here's the plan for dfs

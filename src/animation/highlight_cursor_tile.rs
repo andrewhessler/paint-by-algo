@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use crate::entities::tile::{emit_current::CurrentMouseTileEvent, TILE_SIZE};
+use crate::current_tile::emitter::CurrentMouseTileEvent;
+use crate::entities::tile::TILE_SIZE;
 
 pub struct HighlightCursorTilePlugin;
 

@@ -1,12 +1,21 @@
 use bevy::prelude::*;
 
-use crate::entities::{
-    player::{
-        input::{InputAction, PlayerInput},
-        Player,
-    },
-    tile::{emit_current::CurrentTileEvent, Tile},
-};
+use crate::current_tile::emitter::CurrentTileEvent;
+use crate::entities::{player::Player, tile::Tile};
+use crate::input::{InputAction, KeyboardInputEvent};
+
+pub struct CollidablePlugin;
+
+impl Plugin for CollidablePlugin {
+    fn build(&self, app: &mut App) {
+        app.add_event::<CollidedEvent>()
+            .insert_resource(CollideStatus::Disabled)
+            .add_systems(
+                FixedUpdate,
+                (emit_collided_event, set_collide_status_on_keyboard_input),
+            );
+    }
+}
 
 #[derive(Event)]
 pub struct CollidedEvent {
@@ -17,19 +26,6 @@ pub struct CollidedEvent {
 pub enum CollideStatus {
     Enabled,
     Disabled,
-}
-
-pub struct CollidablePlugin;
-
-impl Plugin for CollidablePlugin {
-    fn build(&self, app: &mut App) {
-        app.add_event::<CollidedEvent>()
-            .insert_resource(CollideStatus::Disabled)
-            .add_systems(
-                FixedUpdate,
-                (emit_collided_event, set_collide_status_on_player_input),
-            );
-    }
 }
 
 #[derive(Component)]
@@ -60,11 +56,11 @@ fn emit_collided_event(
     }
 }
 
-fn set_collide_status_on_player_input(
-    mut player_input_reader: EventReader<PlayerInput>,
+fn set_collide_status_on_keyboard_input(
+    mut keyboard_input_reader: EventReader<KeyboardInputEvent>,
     mut collide_status: ResMut<CollideStatus>,
 ) {
-    for event in player_input_reader.read() {
+    for event in keyboard_input_reader.read() {
         if event.action == InputAction::Pressed && event.key == KeyCode::KeyC {
             *collide_status = match *collide_status {
                 CollideStatus::Enabled => CollideStatus::Disabled,

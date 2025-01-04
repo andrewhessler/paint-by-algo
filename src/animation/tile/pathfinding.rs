@@ -1,13 +1,11 @@
-use std::{collections::VecDeque, sync::atomic::AtomicUsize, time::Duration};
-
 use bevy::prelude::*;
 
+use super::{TileAnimation, TileAnimationState};
 use crate::{
     entities::tile::Tile,
     pathfinding::emit_pathfinding::{PathEvent, PathfindingEvent, PathfindingNode},
 };
-
-use super::{TileAnimation, TileAnimationState};
+use std::{collections::VecDeque, sync::atomic::AtomicUsize, time::Duration};
 
 const PATHFINDING_ANIMATION_DELAY_MS: u64 = 1;
 const PATHFINDING_TILE_BATCH: u64 = 8;

@@ -5,6 +5,16 @@ use crate::entities::{
     tile::{Tile, TILE_SIZE},
 };
 
+pub struct EmitCurrentTilePlugin;
+
+impl Plugin for EmitCurrentTilePlugin {
+    fn build(&self, app: &mut App) {
+        app.add_event::<CurrentTileEvent>()
+            .add_event::<CurrentMouseTileEvent>()
+            .add_systems(FixedUpdate, (emit_current_tile, emit_current_mouse_tile));
+    }
+}
+
 #[derive(Event)]
 pub(crate) struct CurrentTileEvent {
     pub id: usize,
@@ -15,16 +25,6 @@ pub(crate) struct CurrentMouseTileEvent {
     pub id: Option<usize>,
     pub world_x: f32,
     pub world_y: f32,
-}
-
-pub struct EmitCurrentTilePlugin;
-
-impl Plugin for EmitCurrentTilePlugin {
-    fn build(&self, app: &mut App) {
-        app.add_event::<CurrentTileEvent>()
-            .add_event::<CurrentMouseTileEvent>()
-            .add_systems(FixedUpdate, (emit_current_tile, emit_current_mouse_tile));
-    }
 }
 
 fn emit_current_tile(

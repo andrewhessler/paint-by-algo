@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 
-use crate::entities::{
-    player::input::{InputAction, PlayerInput, PlayerMouseInput},
-    tile::{emit_current::CurrentMouseTileEvent, Tile, TileType, COL_COUNT, ROW_COUNT},
-};
-
 use super::algorithms::{
     wilsons::setup_and_run_wilsons, wilsons_bounded::setup_and_run_wilsons_bounded,
     TerrainAlgorithm,
+};
+use crate::input::{InputAction, KeyboardInputEvent, MouseInputEvent};
+use crate::{
+    current_tile::emitter::CurrentMouseTileEvent,
+    entities::tile::{Tile, TileType, COL_COUNT, ROW_COUNT},
 };
 
 #[derive(Clone)]
@@ -57,7 +57,7 @@ impl Plugin for TileModifierPlugin {
 
 fn manage_build_type(
     mut build_type: ResMut<BuildType>,
-    mut player_input_reader: EventReader<PlayerInput>,
+    mut player_input_reader: EventReader<KeyboardInputEvent>,
 ) {
     for event in player_input_reader.read() {
         if event.action == InputAction::Pressed {
@@ -74,7 +74,7 @@ fn manage_build_type(
 
 fn build_walls_to_block_world_wrap(
     q_tiles: Query<&Tile>,
-    mut player_input_reader: EventReader<PlayerInput>,
+    mut player_input_reader: EventReader<KeyboardInputEvent>,
     mut terrain_gen_writer: EventWriter<TerrainGenerationEvent>,
     mut wrapping_wall_active: Local<bool>,
 ) {
@@ -110,7 +110,7 @@ fn build_walls_to_block_world_wrap(
 
 fn fill_with_walls(
     q_tiles: Query<&Tile>,
-    mut player_input_reader: EventReader<PlayerInput>,
+    mut player_input_reader: EventReader<KeyboardInputEvent>,
     mut terrain_gen_writer: EventWriter<TerrainGenerationEvent>,
     mut is_filled: Local<bool>,
 ) {
@@ -140,7 +140,7 @@ fn fill_with_walls(
 
 fn build_maze_with_algorithm(
     q_tiles: Query<&Tile>,
-    mut player_input_reader: EventReader<PlayerInput>,
+    mut player_input_reader: EventReader<KeyboardInputEvent>,
     mut maze_gen_writer: EventWriter<TerrainGenerationEvent>,
     algo: Res<TerrainAlgorithm>,
 ) {
@@ -160,7 +160,7 @@ fn build_maze_with_algorithm(
 
 fn set_algorithm_from_key_input(
     mut algo: ResMut<TerrainAlgorithm>,
-    mut player_input_reader: EventReader<PlayerInput>,
+    mut player_input_reader: EventReader<KeyboardInputEvent>,
 ) {
     for event in player_input_reader.read() {
         if event.action == InputAction::Pressed {
@@ -183,7 +183,7 @@ fn manage_wall_placement(
     q_tiles: Query<&Tile>,
     build_state: Res<BuildType>,
     mut current_mouse_tile_reader: EventReader<CurrentMouseTileEvent>,
-    mut player_mouse_input_reader: EventReader<PlayerMouseInput>,
+    mut mouse_input_reader: EventReader<MouseInputEvent>,
     mut terrain_gen_writer: EventWriter<TerrainGenerationEvent>,
     mut current_tile_id: Local<Option<usize>>,
     mut left_pressed: Local<bool>,
@@ -193,7 +193,7 @@ fn manage_wall_placement(
         *current_tile_id = event.id;
     }
 
-    for event in player_mouse_input_reader.read() {
+    for event in mouse_input_reader.read() {
         if event.key == MouseButton::Left && event.action == InputAction::Pressed {
             *left_pressed = true;
         }

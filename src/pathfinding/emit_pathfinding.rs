@@ -21,7 +21,21 @@ impl Plugin for EmitPathfindingPlugin {
                 random_direction: false,
                 world_wrap_enabled: true,
             })
-            .add_systems(FixedUpdate, trigger_pathfinding_by_button);
+            .insert_resource(Precalc {
+                visited: vec![],
+                path: vec![],
+                current_tile: 0,
+            })
+            .add_systems(
+                FixedUpdate,
+                (
+                    emit_pathfinding_by_button,
+                    precalc_on_algo_change,
+                    precalc_on_current_tile,
+                    precalc_on_terrain_generation,
+                    set_algorithm_from_key_input,
+                ),
+            );
     }
 }
 
@@ -48,119 +62,110 @@ pub struct AlgorithmInUse {
     pub world_wrap_enabled: bool,
 }
 
+#[derive(Resource)]
+pub struct Precalc {
+    visited: Vec<PathfindingNode>,
+    path: Vec<PathfindingNode>,
+    current_tile: usize,
+}
+
 fn run_algo(
     algo: &AlgorithmInUse,
     tiles: &[&Tile],
-    current_tile_id: &usize,
+    current_tile_id: usize,
 ) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     match algo.name {
-        Algorithm::AStar => setup_and_run_astar(&tiles, *current_tile_id, false, algo),
-        Algorithm::AgressiveStar => setup_and_run_astar(&tiles, *current_tile_id, true, algo),
-        Algorithm::BFS => setup_and_run_bfs(&tiles, *current_tile_id, algo),
-        Algorithm::DFS => setup_and_run_dfs(&tiles, *current_tile_id, algo),
-        Algorithm::Dijkstra => setup_and_run_dijkstra(&tiles, *current_tile_id, algo),
+        Algorithm::AStar => setup_and_run_astar(&tiles, current_tile_id, false, algo),
+        Algorithm::AgressiveStar => setup_and_run_astar(&tiles, current_tile_id, true, algo),
+        Algorithm::BFS => setup_and_run_bfs(&tiles, current_tile_id, algo),
+        Algorithm::DFS => setup_and_run_dfs(&tiles, current_tile_id, algo),
+        Algorithm::Dijkstra => setup_and_run_dijkstra(&tiles, current_tile_id, algo),
     }
 }
-
-fn trigger_pathfinding_by_button(
+fn precalc_on_terrain_generation(
+    algo: Res<AlgorithmInUse>,
     tiles: Query<&Tile>,
-    mut keyboard_input_reader: EventReader<KeyboardInputEvent>,
     mut terrain_gen_reader: EventReader<TerrainGenerationEvent>,
-    mut current_tile_reader: EventReader<CurrentTileEvent>,
-    mut pathfinding_writer: EventWriter<PathfindingEvent>,
-    mut path_writer: EventWriter<PathEvent>,
-    mut current_tile_id: Local<usize>,
-    mut pre_calced_event_list: Local<Vec<PathfindingNode>>,
-    mut pre_calced_path: Local<Vec<PathfindingNode>>,
-    mut algo: ResMut<AlgorithmInUse>,
+    mut precalc: ResMut<Precalc>,
 ) {
     for _event in terrain_gen_reader.read() {
         let tiles: Vec<&Tile> = tiles.iter().collect();
-        let (visited, path) = run_algo(&*algo, &tiles, &*current_tile_id);
-        *pre_calced_event_list = visited;
-        *pre_calced_path = path;
+        let (visited, path) = run_algo(&*algo, &tiles, precalc.current_tile);
+        precalc.visited = visited;
+        precalc.path = path;
     }
+}
 
+fn precalc_on_current_tile(
+    algo: Res<AlgorithmInUse>,
+    tiles: Query<&Tile>,
+    mut current_tile_reader: EventReader<CurrentTileEvent>,
+    mut precalc: ResMut<Precalc>,
+) {
     for event in current_tile_reader.read() {
         let tiles: Vec<&Tile> = tiles.iter().collect();
-        *current_tile_id = event.id;
-        let (visited, path) = run_algo(&*algo, &tiles, &*current_tile_id);
-        *pre_calced_event_list = visited;
-        *pre_calced_path = path;
+        precalc.current_tile = event.id;
+        let (visited, path) = run_algo(&*algo, &tiles, precalc.current_tile);
+        precalc.visited = visited;
+        precalc.path = path;
     }
+}
 
+fn precalc_on_algo_change(
+    algo: Res<AlgorithmInUse>,
+    tiles: Query<&Tile>,
+    mut precalc: ResMut<Precalc>,
+) {
+    if algo.is_changed() {
+        let tiles: Vec<&Tile> = tiles.iter().collect();
+        let (visited, path) = run_algo(&*algo, &tiles, precalc.current_tile);
+        precalc.visited = visited;
+        precalc.path = path;
+    }
+}
+
+fn emit_pathfinding_by_button(
+    precalc: Res<Precalc>,
+    mut keyboard_input_reader: EventReader<KeyboardInputEvent>,
+    mut pathfinding_writer: EventWriter<PathfindingEvent>,
+    mut path_writer: EventWriter<PathEvent>,
+) {
     for input in keyboard_input_reader.read() {
-        let needs_recalc = set_algorithm_from_key_input(input, &mut algo);
-        if needs_recalc {
-            let tiles: Vec<&Tile> = tiles.iter().collect();
-            let (visited, path) = run_algo(&*algo, &tiles, &*current_tile_id);
-            *pre_calced_event_list = visited;
-            *pre_calced_path = path;
-        }
-        if input.action == InputAction::Pressed && input.key == KeyCode::KeyJ {
-            println!(
-                "Emitting {} pathfinding events",
-                pre_calced_event_list.len()
-            );
-
-            pathfinding_writer.send(PathfindingEvent {
-                visited: (*pre_calced_event_list).clone(),
-            });
-        }
-
-        if input.action == InputAction::Pressed && input.key == KeyCode::KeyH {
-            println!("Emitting {} Path Events", pre_calced_path.len());
-            let mut nodes = (*pre_calced_path).clone();
-            nodes.reverse();
-            path_writer.send(PathEvent { nodes });
+        if input.action == InputAction::Pressed {
+            match input.key {
+                KeyCode::KeyJ => {
+                    pathfinding_writer.send(PathfindingEvent {
+                        visited: precalc.visited.clone(),
+                    });
+                }
+                KeyCode::KeyH => {
+                    let mut nodes = precalc.path.clone();
+                    nodes.reverse();
+                    path_writer.send(PathEvent { nodes });
+                }
+                _ => {}
+            }
         }
     }
 }
 
 fn set_algorithm_from_key_input(
-    event: &KeyboardInputEvent,
-    algo: &mut ResMut<AlgorithmInUse>,
-) -> bool {
-    if event.action == InputAction::Pressed {
-        if event.key == KeyCode::Digit1 {
-            algo.name = Algorithm::Dijkstra;
-            return true;
-        }
-
-        if event.key == KeyCode::Digit2 {
-            algo.name = Algorithm::AStar;
-            return true;
-        }
-
-        if event.key == KeyCode::Digit3 {
-            algo.name = Algorithm::AgressiveStar;
-            return true;
-        }
-
-        if event.key == KeyCode::Digit4 {
-            algo.name = Algorithm::DFS;
-            return true;
-        }
-
-        if event.key == KeyCode::Digit5 {
-            algo.name = Algorithm::BFS;
-            return true;
-        }
-
-        if event.key == KeyCode::KeyQ {
-            algo.direction_offset = (algo.direction_offset + 1) % 8;
-            return true;
-        }
-
-        if event.key == KeyCode::KeyP {
-            algo.world_wrap_enabled = !algo.world_wrap_enabled;
-            return true;
-        }
-
-        if event.key == KeyCode::KeyX {
-            algo.random_direction = !algo.random_direction;
-            return true;
+    mut keyboard_input_reader: EventReader<KeyboardInputEvent>,
+    mut algo: ResMut<AlgorithmInUse>,
+) {
+    for event in keyboard_input_reader.read() {
+        if event.action == InputAction::Pressed {
+            match event.key {
+                KeyCode::Digit1 => algo.name = Algorithm::Dijkstra,
+                KeyCode::Digit2 => algo.name = Algorithm::AStar,
+                KeyCode::Digit3 => algo.name = Algorithm::AgressiveStar,
+                KeyCode::Digit4 => algo.name = Algorithm::DFS,
+                KeyCode::Digit5 => algo.name = Algorithm::BFS,
+                KeyCode::KeyQ => algo.direction_offset = (algo.direction_offset + 1) % 8,
+                KeyCode::KeyP => algo.world_wrap_enabled = !algo.world_wrap_enabled,
+                KeyCode::KeyX => algo.random_direction = !algo.random_direction,
+                _ => {}
+            }
         }
     }
-    false
 }

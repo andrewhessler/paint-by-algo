@@ -11,7 +11,6 @@ pub fn setup_and_run_bfs(
     current_tile_id: usize,
     algo: &AlgorithmInUse,
 ) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
-    println!("Triggered BFS");
     let mut end_tile_pos: Option<(usize, usize)> = None;
     let mut current_tile_pos: (usize, usize) = (0, 0);
     let mut visited = vec![];

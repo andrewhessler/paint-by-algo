@@ -17,7 +17,6 @@ pub fn setup_and_run_astar(
 
     // This looks weird, probably want it dynamic some day.
     let mut nodes: Vec<Vec<Node>> = vec![vec![Node::default(); COL_COUNT]; ROW_COUNT];
-    println!("Ran ASTAR");
 
     for tile in grid {
         let row = tile.row as usize;
@@ -80,7 +79,8 @@ fn astar(
         directions.shuffle(&mut rng);
     }
 
-    while let Some(mut node) = heap.pop() {
+    while let Some(node) = heap.pop() {
+        let current_node = &mut grid[node.row][node.col];
         if (node.row, node.col) == end_pos {
             break;
         }
@@ -89,7 +89,7 @@ fn astar(
             continue;
         }
 
-        node.visited = true;
+        current_node.visited = true;
         visited_order.push(PathfindingNode {
             tile_id: node.tile_id,
         });

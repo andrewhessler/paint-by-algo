@@ -11,7 +11,7 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub struct TerrainEvent {
+pub struct TerrainNode {
     pub tile_id: usize,
     pub build_type: BuildType,
     pub action: TerrainAction,
@@ -19,7 +19,7 @@ pub struct TerrainEvent {
 
 #[derive(Event, Clone)]
 pub struct TerrainGenerationEvent {
-    pub terrain_events: Vec<TerrainEvent>,
+    pub terrain_events: Vec<TerrainNode>,
 }
 
 #[derive(PartialEq, Clone, Copy)]
@@ -46,7 +46,7 @@ impl Plugin for TileModifierPlugin {
                 (
                     build_maze_with_algorithm,
                     fill_with_walls,
-                    manage_wall_placement,
+                    manage_wall_placement_from_mouse_input,
                     manage_build_type,
                     build_walls_to_block_world_wrap,
                     set_algorithm_from_key_input,
@@ -94,7 +94,7 @@ fn build_walls_to_block_world_wrap(
                     || tile.col >= COL_COUNT - 2
                     || tile.col < 2
                 {
-                    walls.push(TerrainEvent {
+                    walls.push(TerrainNode {
                         tile_id: tile.id,
                         build_type: BuildType::Wall,
                         action: action.clone(),
@@ -125,7 +125,7 @@ fn fill_with_walls(
             };
             *is_filled = !*is_filled;
             for tile in tiles {
-                walls.push(TerrainEvent {
+                walls.push(TerrainNode {
                     tile_id: tile.id,
                     action,
                     build_type: BuildType::Wall,
@@ -179,7 +179,7 @@ fn set_algorithm_from_key_input(
     }
 }
 
-fn manage_wall_placement(
+fn manage_wall_placement_from_mouse_input(
     q_tiles: Query<&Tile>,
     build_state: Res<BuildType>,
     mut current_mouse_tile_reader: EventReader<CurrentMouseTileEvent>,
@@ -213,7 +213,7 @@ fn manage_wall_placement(
             for tile in &q_tiles {
                 if tile.id == current_tile && tile.tile_type != TileType::Wall {
                     terrain_gen_writer.send(TerrainGenerationEvent {
-                        terrain_events: vec![TerrainEvent {
+                        terrain_events: vec![TerrainNode {
                             tile_id: tile.id,
                             build_type: *build_state,
                             action: TerrainAction::Added,
@@ -227,7 +227,7 @@ fn manage_wall_placement(
             for tile in &q_tiles {
                 if tile.id == current_tile {
                     terrain_gen_writer.send(TerrainGenerationEvent {
-                        terrain_events: vec![TerrainEvent {
+                        terrain_events: vec![TerrainNode {
                             tile_id: tile.id,
                             build_type: *build_state,
                             action: TerrainAction::Removed,

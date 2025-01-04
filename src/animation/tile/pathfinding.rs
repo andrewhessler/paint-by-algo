@@ -7,8 +7,8 @@ use crate::{
 };
 use std::{collections::VecDeque, sync::atomic::AtomicUsize, time::Duration};
 
-const PATHFINDING_ANIMATION_DELAY_MS: u64 = 1;
-const PATHFINDING_TILE_BATCH: u64 = 8;
+const PATHFINDING_ANIMATION_DELAY_MS: u64 = 16;
+const PATHFINDING_TILE_BATCH: u64 = 5;
 
 pub struct PathfindingTileAnimationPlugin;
 

@@ -14,7 +14,7 @@ pub struct TileAnimationPlugin;
 impl Plugin for TileAnimationPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((TerrainTileAnimationPlugin, PathfindingTileAnimationPlugin))
-            .add_systems(FixedUpdate, animate_tile);
+            .add_systems(Update, animate_tile);
     }
 }
 

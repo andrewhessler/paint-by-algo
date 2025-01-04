@@ -2,13 +2,13 @@ use std::usize;
 
 use crate::{
     entities::tile::{Tile, COL_COUNT, ROW_COUNT},
-    terrain::tile_modifier::{BuildType, TerrainAction, TerrainEvent},
+    terrain::tile_modifier::{BuildType, TerrainAction, TerrainNode},
 };
 use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng, Rng};
 
 use super::node::{Node, NodeState};
 
-pub fn setup_and_run_wilsons_bounded(grid: &[&Tile]) -> Vec<TerrainEvent> {
+pub fn setup_and_run_wilsons_bounded(grid: &[&Tile]) -> Vec<TerrainNode> {
     /*
      * Create a terrain event to convert every Tile to a wall
      *
@@ -21,7 +21,7 @@ pub fn setup_and_run_wilsons_bounded(grid: &[&Tile]) -> Vec<TerrainEvent> {
     let mut terrain_events = vec![];
     let mut nodes: Vec<Vec<Node>> = vec![vec![Node::default(); COL_COUNT]; ROW_COUNT];
     for tile in grid {
-        terrain_events.push(TerrainEvent {
+        terrain_events.push(TerrainNode {
             tile_id: tile.id,
             action: TerrainAction::Added,
             build_type: BuildType::Wall,
@@ -32,26 +32,24 @@ pub fn setup_and_run_wilsons_bounded(grid: &[&Tile]) -> Vec<TerrainEvent> {
     terrain_events
 }
 
-pub fn wilsons_bounded(mut grid: Vec<Vec<Node>>, terrain_events: &mut Vec<TerrainEvent>) {
+pub fn wilsons_bounded(mut grid: Vec<Vec<Node>>, terrain_events: &mut Vec<TerrainNode>) {
     let mut rng = thread_rng();
 
     let seed_row = rng.gen_range(0..ROW_COUNT / 2) * 2;
     let seed_col = rng.gen_range(0..COL_COUNT / 2) * 2;
     grid[seed_row][seed_col].state = NodeState::Path;
-    terrain_events.push(TerrainEvent {
+    terrain_events.push(TerrainNode {
         tile_id: grid[seed_row][seed_col].tile_id,
         action: TerrainAction::Removed,
         build_type: BuildType::Wall,
     });
 
     while let Some((row, col)) = pick_random_unvisited(&grid, &mut rng) {
-        println!("random unvisited: {}, {}", row, col);
-        println!("random seed: {}, {}", seed_row, seed_col);
         let path = random_walk(row, col, &mut grid, &mut rng, terrain_events);
 
         for &(r, c) in &path {
             grid[r][c].state = NodeState::Path;
-            terrain_events.push(TerrainEvent {
+            terrain_events.push(TerrainNode {
                 tile_id: grid[r][c].tile_id,
                 action: TerrainAction::Removed,
                 build_type: BuildType::Wall,
@@ -79,7 +77,7 @@ fn random_walk(
     start_col: usize,
     grid: &mut Vec<Vec<Node>>,
     rng: &mut ThreadRng,
-    terrain_events: &mut Vec<TerrainEvent>,
+    terrain_events: &mut Vec<TerrainNode>,
 ) -> Vec<(usize, usize)> {
     let directions = [(0, 2), (2, 0), (0, -2), (-2, 0)];
     let in_bounds = |row: isize, col: isize| -> bool {
@@ -90,7 +88,7 @@ fn random_walk(
     let mut current_col = start_col;
     let mut path: Vec<(usize, usize)> = vec![(start_row, start_col)];
     grid[current_row][current_col].state = NodeState::Current;
-    terrain_events.push(TerrainEvent {
+    terrain_events.push(TerrainNode {
         tile_id: grid[current_row][current_col].tile_id,
         action: TerrainAction::Removed,
         build_type: BuildType::Wall,
@@ -115,14 +113,14 @@ fn random_walk(
                 &mut grid[(new_row - dr / 2) as usize][(new_col - dc / 2) as usize];
             intermediate_node.state = NodeState::Current;
             path.push((intermediate_node.row, intermediate_node.col));
-            terrain_events.push(TerrainEvent {
+            terrain_events.push(TerrainNode {
                 tile_id: intermediate_node.tile_id,
                 action: TerrainAction::Removed,
                 build_type: BuildType::Wall,
             });
             if grid[u_new_row][u_new_col].state == NodeState::Unvisited {
                 grid[u_new_row][u_new_col].state = NodeState::Current;
-                terrain_events.push(TerrainEvent {
+                terrain_events.push(TerrainNode {
                     tile_id: grid[u_new_row][u_new_col].tile_id,
                     action: TerrainAction::Removed,
                     build_type: BuildType::Wall,
@@ -140,7 +138,7 @@ fn random_walk(
                         continue;
                     }
                     grid[*row][*col].state = NodeState::Unvisited;
-                    terrain_events.push(TerrainEvent {
+                    terrain_events.push(TerrainNode {
                         tile_id: grid[*row][*col].tile_id,
                         action: TerrainAction::Added,
                         build_type: BuildType::Wall,

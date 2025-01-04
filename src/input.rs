@@ -6,7 +6,7 @@ impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<KeyboardInputEvent>()
             .add_event::<MouseInputEvent>()
-            .add_systems(Update, broadcast_player_input);
+            .add_systems(Update, broadcast_input);
     }
 }
 
@@ -28,7 +28,7 @@ pub struct MouseInputEvent {
     pub action: InputAction,
 }
 
-fn broadcast_player_input(
+fn broadcast_input(
     keys: Res<ButtonInput<KeyCode>>,
     mouse: Res<ButtonInput<MouseButton>>,
     mut player_input_writer: EventWriter<KeyboardInputEvent>,

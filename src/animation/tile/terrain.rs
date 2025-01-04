@@ -4,7 +4,7 @@ use super::{TileAnimation, TileAnimationState};
 use crate::input::{InputAction, KeyboardInputEvent};
 use crate::{
     entities::tile::{EndUpdatedEvent, Tile, COL_COUNT, END_TILE_COLOR, ROW_COUNT, WALL_COLOR},
-    terrain::tile_modifier::{TerrainAction, TerrainEvent, TerrainGenerationEvent},
+    terrain::tile_modifier::{TerrainAction, TerrainGenerationEvent, TerrainNode},
 };
 use std::{collections::VecDeque, time::Duration};
 
@@ -24,7 +24,7 @@ impl Plugin for TerrainTileAnimationPlugin {
             fast_mode_enabled: false,
         })
         .add_systems(
-            FixedUpdate,
+            Update,
             (
                 initiate_animation,
                 handle_terrain_event,
@@ -48,7 +48,7 @@ struct EventQueueWithTimesFired {
 }
 
 struct AnimationFromTerrain {
-    event: TerrainEvent,
+    event: TerrainNode,
     is_wall: bool,
 }
 

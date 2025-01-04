@@ -41,7 +41,7 @@ pub fn setup_and_run_dijkstra(
 
 // Emits an individual Pathfinding event per visited node
 fn dijkstra(
-    mut nodes: Vec<Vec<Node>>,
+    mut grid: Vec<Vec<Node>>,
     current_tile_pos: (usize, usize),
     end_tile_pos: Option<(usize, usize)>,
     algo: &AlgorithmInUse,
@@ -51,7 +51,7 @@ fn dijkstra(
     let mut path = vec![];
     heap.push(Node {
         distance: 0,
-        ..nodes[current_tile_pos.0][current_tile_pos.1]
+        ..grid[current_tile_pos.0][current_tile_pos.1]
     });
 
     let mut directions = [
@@ -71,7 +71,7 @@ fn dijkstra(
     }
 
     let end_pos = end_tile_pos.unwrap_or((0, 0));
-    while let Some(mut node) = heap.pop() {
+    while let Some(node) = heap.pop() {
         if node.visited == true || node.is_wall {
             continue;
         }
@@ -80,7 +80,7 @@ fn dijkstra(
             break;
         }
 
-        node.visited = true;
+        grid[node.row][node.col].visited = true;
         visited_order.push(PathfindingNode {
             tile_id: node.tile_id,
         });
@@ -94,13 +94,13 @@ fn dijkstra(
                 continue;
             }
 
-            if nodes[visit_row][visit_col].is_wall {
+            if grid[visit_row][visit_col].is_wall {
                 continue;
             }
 
             let directional_distance = if dr.abs() + dc.abs() == 2 { 14 } else { 10 };
 
-            let checked_node = &mut nodes[visit_row][visit_col];
+            let checked_node = &mut grid[visit_row][visit_col];
             let new_distance = node.distance + directional_distance;
 
             if new_distance < checked_node.distance {
@@ -111,12 +111,12 @@ fn dijkstra(
             }
         }
     }
-    let mut head = &nodes[end_pos.0][end_pos.1];
+    let mut head = &grid[end_pos.0][end_pos.1];
     while let Some((row, col)) = head.previous_node {
         path.push(PathfindingNode {
             tile_id: head.tile_id,
         });
-        head = &nodes[row][col];
+        head = &grid[row][col];
         if row == current_tile_pos.0 && col == current_tile_pos.1 {
             break;
         }

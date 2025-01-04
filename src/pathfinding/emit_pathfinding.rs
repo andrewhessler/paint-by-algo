@@ -162,6 +162,7 @@ fn set_algorithm_from_key_input(
                 KeyCode::Digit4 => algo.name = Algorithm::DFS,
                 KeyCode::Digit5 => algo.name = Algorithm::BFS,
                 KeyCode::KeyQ => algo.direction_offset = (algo.direction_offset + 1) % 8,
+                KeyCode::KeyT => algo.direction_offset = (algo.direction_offset + 7) % 8,
                 KeyCode::KeyP => algo.world_wrap_enabled = !algo.world_wrap_enabled,
                 KeyCode::KeyX => algo.random_direction = !algo.random_direction,
                 _ => {}

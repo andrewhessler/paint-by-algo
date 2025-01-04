@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::current_tile::emitter::CurrentTileEvent;
-use crate::entities::{player::Player, tile::Tile};
+use crate::entities::tile::Tile;
 use crate::input::{InputAction, KeyboardInputEvent};
 
 pub struct CollidablePlugin;
@@ -18,9 +18,7 @@ impl Plugin for CollidablePlugin {
 }
 
 #[derive(Event)]
-pub struct CollidedEvent {
-    pub rebound_direction: Vec2,
-}
+pub struct CollidedEvent;
 
 #[derive(Resource, PartialEq)]
 pub enum CollideStatus {
@@ -35,21 +33,13 @@ fn emit_collided_event(
     mut current_tile_reader: EventReader<CurrentTileEvent>,
     mut collided_event_writer: EventWriter<CollidedEvent>,
     collide_status: Res<CollideStatus>,
-    tiles: Query<(&Tile, &Transform), With<Collidable>>,
-    player: Single<&Transform, With<Player>>,
+    tiles: Query<&Tile, With<Collidable>>,
 ) {
     for event in current_tile_reader.read() {
         if *collide_status == CollideStatus::Enabled {
-            for (tile, xf) in &tiles {
+            for tile in &tiles {
                 if tile.id == event.id {
-                    let p_xf = *player;
-                    let (tile_x, tile_y) = (xf.translation.x, xf.translation.y);
-                    let (player_x, player_y) = (p_xf.translation.x, p_xf.translation.y);
-
-                    let rebound_direction =
-                        Vec2::new(player_x - tile_x, player_y - tile_y).normalize();
-
-                    collided_event_writer.send(CollidedEvent { rebound_direction });
+                    collided_event_writer.send(CollidedEvent);
                 }
             }
         }

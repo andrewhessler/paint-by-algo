@@ -37,7 +37,8 @@ Algorithms (Press Number to paint with)
 J - to pulse pathfinding
 H - to highlight path
 
-Q - Rotate direction bias (most noticeable with DFS in an open space)
+Q - Rotate direction bias left (most noticeable with DFS in an open space)
+T - Rotate direction bias right (most noticeable with DFS in an open space)
 X - Toggle random direction bias (Default: off)
 P - Toggle world wrap for pathfinding (Default: on)
 ```

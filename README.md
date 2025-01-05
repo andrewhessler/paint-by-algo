@@ -23,7 +23,7 @@ Right-Click - Remove
 Default Builds 
 ```
 Z - Build Walls around edge of world wrap
-F - To fill or clear Walls 
+F - to fill or clear Walls 
 ```
 
 Algorithms (Press Number to paint with)

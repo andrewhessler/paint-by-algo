@@ -10,7 +10,7 @@ Algorithm playground
 
 ```
 WASD to move
-C - Enable Wall Collision (Default: Disabled)
+C - Enable Wall Collision (Default: Disabled and is bad)
 ```
 
 Build Mode (Left Click builds...)

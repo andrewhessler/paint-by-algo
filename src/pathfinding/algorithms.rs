@@ -6,7 +6,7 @@ pub mod node;
 mod util;
 
 pub enum Algorithm {
-    AgressiveStar,
+    AggressiveStar,
     AStar,
     BFS,
     DFS,

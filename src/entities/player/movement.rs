@@ -213,7 +213,7 @@ fn player_movement(time: Res<Time>, mut movement: Query<(&Transform, &mut Player
 
 fn transform_movement_interpolate(
     fixed_time: Res<Time<Fixed>>,
-    mut movement: Query<(&mut Transform, &mut PlayerMovement)>,
+    mut movement: Query<(&mut Transform, &PlayerMovement)>,
 ) {
     for (mut xf, state) in &mut movement {
         let a = fixed_time.overstep_fraction();

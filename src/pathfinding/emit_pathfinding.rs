@@ -78,7 +78,7 @@ fn run_algo(
 ) -> (Vec<PathfindingNode>, Vec<PathfindingNode>) {
     match algo.name {
         Algorithm::AStar => setup_and_run_astar(&tiles, current_tile_id, false, algo),
-        Algorithm::AgressiveStar => setup_and_run_astar(&tiles, current_tile_id, true, algo),
+        Algorithm::AggressiveStar => setup_and_run_astar(&tiles, current_tile_id, true, algo),
         Algorithm::BFS => setup_and_run_bfs(&tiles, current_tile_id, algo),
         Algorithm::DFS => setup_and_run_dfs(&tiles, current_tile_id, algo),
         Algorithm::Dijkstra => setup_and_run_dijkstra(&tiles, current_tile_id, algo),
@@ -160,7 +160,7 @@ fn set_algorithm_from_key_input(
             match event.key {
                 KeyCode::Digit1 => algo.name = Algorithm::Dijkstra,
                 KeyCode::Digit2 => algo.name = Algorithm::AStar,
-                KeyCode::Digit3 => algo.name = Algorithm::AgressiveStar,
+                KeyCode::Digit3 => algo.name = Algorithm::AggressiveStar,
                 KeyCode::Digit4 => algo.name = Algorithm::DFS,
                 KeyCode::Digit5 => algo.name = Algorithm::BFS,
                 KeyCode::KeyQ => algo.direction_offset = (algo.direction_offset + 1) % 8,

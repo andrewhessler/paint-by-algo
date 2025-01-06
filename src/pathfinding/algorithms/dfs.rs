@@ -17,7 +17,7 @@ use rand::thread_rng;
 
 /*
  * DFS would involve following the first unvisited child
- * BFS would involve seraching all of a nodes children, then moving on to proces their children
+ * BFS would involve searching all of a nodes children, then moving on to process their children
  */
 
 pub fn setup_and_run_dfs(
